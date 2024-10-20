@@ -22,7 +22,7 @@ public class GetSchedulesHandler : IQueryHandler<GetSchedulesQuery, List<Schedul
 
         return schedules.Select(schedule => new ScheduleDetailsDto
         {
-            Id = schedule.Id.Value,
+            Id = schedule.ScheduleId,
             Quiz = schedule.Quiz,
             StartDate = schedule.StartDate,
             EndDate = schedule.EndDate,

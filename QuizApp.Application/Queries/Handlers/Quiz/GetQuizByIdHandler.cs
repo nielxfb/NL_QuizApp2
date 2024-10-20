@@ -17,7 +17,7 @@ public class GetQuizByIdHandler : IQueryHandler<GetQuizByIdQuery, QuizDetailsDto
 
     public async Task<QuizDetailsDto> HandleAsync(GetQuizByIdQuery query)
     {
-        var quiz = await _repository.GetByIdAsync(new QuizId(query.Id));
+        var quiz = await _repository.GetByIdAsync(query.Id);
         if (quiz == null)
         {
             throw new ArgumentException("Quiz not found.");
@@ -25,7 +25,7 @@ public class GetQuizByIdHandler : IQueryHandler<GetQuizByIdQuery, QuizDetailsDto
         
         return new QuizDetailsDto
         {
-            Id = quiz.Id.Value,
+            Id = quiz.QuizId,
             Title = quiz.Title,
         };
     }

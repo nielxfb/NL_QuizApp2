@@ -18,7 +18,7 @@ public class AddScheduleHandler : ICommandHandler<AddScheduleCommand>
 
     public async Task HandleAsync(AddScheduleCommand command)
     {
-        var quiz = await _quizRepository.GetByIdAsync(new QuizId(command.QuizId));
+        var quiz = await _quizRepository.GetByIdAsync(command.QuizId);
         if (quiz == null)
         {
             throw new ArgumentException("Quiz not found.");
@@ -36,7 +36,7 @@ public class AddScheduleHandler : ICommandHandler<AddScheduleCommand>
 
         var schedule = new Domain.Entities.Schedule
         {
-            Id = new ScheduleId(Guid.NewGuid()),
+            ScheduleId = Guid.NewGuid(),
             Quiz = quiz,
             StartDate = command.StartDate,
             EndDate = command.EndDate

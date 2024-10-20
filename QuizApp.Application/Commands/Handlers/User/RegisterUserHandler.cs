@@ -32,7 +32,7 @@ public class RegisterUserHandler : ICommandHandler<RegisterUserCommand>
         
         var user = new Domain.Entities.User
         {
-            Id = new UserId(Guid.NewGuid()),
+            UserId = Guid.NewGuid(),
             FullName = command.FullName,
             Initial = command.Initial,
             Role = "User",

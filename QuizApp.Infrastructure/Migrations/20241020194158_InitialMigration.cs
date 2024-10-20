@@ -12,77 +12,77 @@ namespace QuizApp.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Quiz",
+                name: "Quizzes",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    QuizId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Quiz", x => x.Id);
+                    table.PrimaryKey("PK_Quizzes", x => x.QuizId);
                 });
 
             migrationBuilder.CreateTable(
-                name: "User",
+                name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Initial = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Role = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                    Password = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_User", x => x.Id);
+                    table.PrimaryKey("PK_Users", x => x.UserId);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Question",
+                name: "Questions",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    QuizId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    QuestionId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
+                    QuizId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
                     QuestionText = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Question", x => x.Id);
+                    table.PrimaryKey("PK_Questions", x => x.QuestionId);
                     table.ForeignKey(
-                        name: "FK_Question_Quiz_QuizId",
+                        name: "FK_Questions_Quizzes_QuizId",
                         column: x => x.QuizId,
-                        principalTable: "Quiz",
-                        principalColumn: "Id",
+                        principalTable: "Quizzes",
+                        principalColumn: "QuizId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Schedule",
+                name: "Schedules",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    QuizId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ScheduleId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
+                    QuizId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Schedule", x => x.Id);
+                    table.PrimaryKey("PK_Schedules", x => x.ScheduleId);
                     table.ForeignKey(
-                        name: "FK_Schedule_Quiz_QuizId",
+                        name: "FK_Schedules_Quizzes_QuizId",
                         column: x => x.QuizId,
-                        principalTable: "Quiz",
-                        principalColumn: "Id",
+                        principalTable: "Quizzes",
+                        principalColumn: "QuizId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Option",
+                name: "Options",
                 columns: table => new
                 {
-                    QuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    QuestionId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
                     OptionChoice = table.Column<string>(type: "nvarchar(1)", nullable: false),
                     OptionText = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
@@ -90,113 +90,111 @@ namespace QuizApp.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Option", x => new { x.QuestionId, x.OptionChoice });
+                    table.PrimaryKey("PK_Options", x => new { x.QuestionId, x.OptionChoice });
                     table.ForeignKey(
-                        name: "FK_Option_Question_QuestionId",
+                        name: "FK_Options_Questions_QuestionId",
                         column: x => x.QuestionId,
-                        principalTable: "Question",
-                        principalColumn: "Id",
+                        principalTable: "Questions",
+                        principalColumn: "QuestionId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserSchedule",
+                name: "UserSchedules",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ScheduleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
+                    ScheduleId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserSchedule", x => new { x.UserId, x.ScheduleId });
+                    table.PrimaryKey("PK_UserSchedules", x => new { x.UserId, x.ScheduleId });
                     table.ForeignKey(
-                        name: "FK_UserSchedule_Schedule_ScheduleId",
+                        name: "FK_UserSchedules_Schedules_ScheduleId",
                         column: x => x.ScheduleId,
-                        principalTable: "Schedule",
-                        principalColumn: "Id",
+                        principalTable: "Schedules",
+                        principalColumn: "ScheduleId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserSchedule_User_UserId",
+                        name: "FK_UserSchedules_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
-                        principalColumn: "Id",
+                        principalTable: "Users",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Response",
+                name: "Responses",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    QuizId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    QuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ResponseId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
+                    QuizId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
+                    QuestionId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
                     OptionChoice = table.Column<string>(type: "nvarchar(1)", nullable: false),
                     IsCorrect = table.Column<bool>(type: "bit", nullable: false),
                     AnsweredAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Response", x => x.Id);
+                    table.PrimaryKey("PK_Responses", x => x.ResponseId);
                     table.ForeignKey(
-                        name: "FK_Response_Option_QuestionId_OptionChoice",
+                        name: "FK_Responses_Options_QuestionId_OptionChoice",
                         columns: x => new { x.QuestionId, x.OptionChoice },
-                        principalTable: "Option",
+                        principalTable: "Options",
                         principalColumns: new[] { "QuestionId", "OptionChoice" });
                     table.ForeignKey(
-                        name: "FK_Response_Question_QuestionId",
+                        name: "FK_Responses_Questions_QuestionId",
                         column: x => x.QuestionId,
-                        principalTable: "Question",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "Questions",
+                        principalColumn: "QuestionId");
                     table.ForeignKey(
-                        name: "FK_Response_Quiz_QuizId",
+                        name: "FK_Responses_Quizzes_QuizId",
                         column: x => x.QuizId,
-                        principalTable: "Quiz",
-                        principalColumn: "Id");
+                        principalTable: "Quizzes",
+                        principalColumn: "QuizId");
                     table.ForeignKey(
-                        name: "FK_Response_User_UserId",
+                        name: "FK_Responses_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "Users",
+                        principalColumn: "UserId");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Question_QuizId",
-                table: "Question",
+                name: "IX_Questions_QuizId",
+                table: "Questions",
                 column: "QuizId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Response_QuestionId",
-                table: "Response",
+                name: "IX_Responses_QuestionId",
+                table: "Responses",
                 column: "QuestionId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Response_QuestionId_OptionChoice",
-                table: "Response",
+                name: "IX_Responses_QuestionId_OptionChoice",
+                table: "Responses",
                 columns: new[] { "QuestionId", "OptionChoice" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Response_QuizId",
-                table: "Response",
+                name: "IX_Responses_QuizId",
+                table: "Responses",
                 column: "QuizId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Response_UserId",
-                table: "Response",
+                name: "IX_Responses_UserId",
+                table: "Responses",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Schedule_QuizId",
-                table: "Schedule",
+                name: "IX_Schedules_QuizId",
+                table: "Schedules",
                 column: "QuizId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserSchedule_ScheduleId",
-                table: "UserSchedule",
+                name: "IX_UserSchedules_ScheduleId",
+                table: "UserSchedules",
                 column: "ScheduleId");
         }
 
@@ -204,25 +202,25 @@ namespace QuizApp.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Response");
+                name: "Responses");
 
             migrationBuilder.DropTable(
-                name: "UserSchedule");
+                name: "UserSchedules");
 
             migrationBuilder.DropTable(
-                name: "Option");
+                name: "Options");
 
             migrationBuilder.DropTable(
-                name: "Schedule");
+                name: "Schedules");
 
             migrationBuilder.DropTable(
-                name: "User");
+                name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Question");
+                name: "Questions");
 
             migrationBuilder.DropTable(
-                name: "Quiz");
+                name: "Quizzes");
         }
     }
 }

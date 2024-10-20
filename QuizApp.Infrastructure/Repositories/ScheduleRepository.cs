@@ -27,7 +27,7 @@ public class ScheduleRepository : IScheduleRepository
             .ToListAsync();
     }
 
-    public async Task<Schedule?> GetByIdAsync(ScheduleId scheduleId)
+    public async Task<Schedule?> GetByIdAsync(Guid scheduleId)
     {
         return await _context.Schedules
             .FindAsync(scheduleId);

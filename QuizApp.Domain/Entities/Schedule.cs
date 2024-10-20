@@ -1,11 +1,13 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace QuizApp.Domain.Entities;
 
 public class Schedule
 {
-    public ScheduleId Id { get; set; } = null!;
-    public QuizId QuizId { get; set; } = null!;
+    [Key] [MaxLength(20)] public Guid ScheduleId { get; set; } = Guid.Empty;
+    [MaxLength(20)] public Guid QuizId { get; set; } = Guid.Empty;
     public Quiz Quiz { get; set; } = null!;
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
-    public ICollection<UserSchedule> UserSchedules = new List<UserSchedule>();
+    public ICollection<UserSchedule> UserSchedules { get; } = new List<UserSchedule>();
 }

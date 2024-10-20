@@ -20,7 +20,7 @@ public class GetQuizzesHandler : IQueryHandler<GetQuizzesQuery, List<QuizDetails
 
         return quizzes.Select(quiz => new QuizDetailsDto
         {
-            Id = quiz.Id.Value,
+            Id = quiz.QuizId,
             Title = quiz.Title,
         }).ToList();
     }

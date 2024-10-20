@@ -1,10 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace QuizApp.Domain.Entities;
 
 public class Quiz
 {
-    public QuizId Id { get; set; } = null!;
-    public string Title { get; set; } = string.Empty;
-    public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
-    public ICollection<Question> Questions { get; set; } = new List<Question>();
-    public ICollection<Response> Responses { get; set; } = new List<Response>();
+    [Key] [MaxLength(20)] public Guid QuizId { get; set; } = Guid.Empty;
+    [MaxLength(20)] public string Title { get; set; } = string.Empty;
+    public ICollection<Schedule> Schedules { get; } = new List<Schedule>();
+    public ICollection<Question> Questions { get; } = new List<Question>();
+    public ICollection<Response> Responses { get; } = new List<Response>();
 }

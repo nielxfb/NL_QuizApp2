@@ -12,7 +12,7 @@ using QuizApp.Infrastructure.Persistence;
 namespace QuizApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241020065224_InitialMigration")]
+    [Migration("20241020194158_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -28,6 +28,7 @@ namespace QuizApp.Infrastructure.Migrations
             modelBuilder.Entity("QuizApp.Domain.Entities.Option", b =>
                 {
                     b.Property<Guid>("QuestionId")
+                        .HasMaxLength(20)
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("OptionChoice")
@@ -47,12 +48,14 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasKey("QuestionId", "OptionChoice");
 
-                    b.ToTable("Option");
+                    b.ToTable("Options");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Question", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("QuestionId")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ImageUrl")
@@ -65,33 +68,38 @@ namespace QuizApp.Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid>("QuizId")
+                        .HasMaxLength(20)
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.HasKey("QuestionId");
 
                     b.HasIndex("QuizId");
 
-                    b.ToTable("Question");
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Quiz", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("QuizId")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
-                    b.HasKey("Id");
+                    b.HasKey("QuizId");
 
-                    b.ToTable("Quiz");
+                    b.ToTable("Quizzes");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Response", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("ResponseId")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("AnsweredAt")
@@ -105,15 +113,18 @@ namespace QuizApp.Infrastructure.Migrations
                         .HasColumnType("nvarchar(1)");
 
                     b.Property<Guid>("QuestionId")
+                        .HasMaxLength(20)
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("QuizId")
+                        .HasMaxLength(20)
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
+                        .HasMaxLength(20)
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.HasKey("ResponseId");
 
                     b.HasIndex("QuestionId")
                         .IsUnique();
@@ -124,39 +135,44 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasIndex("QuestionId", "OptionChoice");
 
-                    b.ToTable("Response");
+                    b.ToTable("Responses");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Schedule", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("ScheduleId")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("QuizId")
+                        .HasMaxLength(20)
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                    b.HasKey("ScheduleId");
 
                     b.HasIndex("QuizId");
 
-                    b.ToTable("Schedule");
+                    b.ToTable("Schedules");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.User", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Initial")
                         .IsRequired()
@@ -165,37 +181,39 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserId");
 
-                    b.ToTable("User");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.UserSchedule", b =>
                 {
                     b.Property<Guid>("UserId")
+                        .HasMaxLength(20)
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ScheduleId")
+                        .HasMaxLength(20)
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("UserId", "ScheduleId");
 
                     b.HasIndex("ScheduleId");
 
-                    b.ToTable("UserSchedule");
+                    b.ToTable("UserSchedules");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Option", b =>
@@ -225,7 +243,7 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasOne("QuizApp.Domain.Entities.Question", "Question")
                         .WithOne("Response")
                         .HasForeignKey("QuizApp.Domain.Entities.Response", "QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("QuizApp.Domain.Entities.Quiz", "Quiz")
@@ -237,7 +255,7 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasOne("QuizApp.Domain.Entities.User", "User")
                         .WithMany("Responses")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("QuizApp.Domain.Entities.Option", "Option")

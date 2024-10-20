@@ -32,14 +32,14 @@ public class UserScheduleRepository : IUserScheduleRepository
         return _context.SaveChangesAsync();
     }
 
-    public async Task<List<UserSchedule>> GetByUserIdAsync(UserId userId)
+    public async Task<List<UserSchedule>> GetByUserIdAsync(Guid userId)
     {
         return await _context.UserSchedules
             .Where(us => us.UserId == userId)
             .ToListAsync();
     }
 
-    public async Task<List<User>> GetByScheduleIdAsync(ScheduleId scheduleId)
+    public async Task<List<User>> GetByScheduleIdAsync(Guid scheduleId)
     {
         // return await _context.UserSchedules
         //     .Include(us => us.User)

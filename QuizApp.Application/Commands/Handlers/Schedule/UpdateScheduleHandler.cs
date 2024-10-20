@@ -18,7 +18,7 @@ public class UpdateScheduleHandler : ICommandHandler<UpdateScheduleCommand>
 
     public async Task HandleAsync(UpdateScheduleCommand command)
     {
-        var quiz = await _quizRepository.GetByIdAsync(new QuizId(command.QuizId));
+        var quiz = await _quizRepository.GetByIdAsync(command.QuizId);
         if (quiz == null)
         {
             throw new ArgumentException("Quiz not found.");
@@ -34,7 +34,7 @@ public class UpdateScheduleHandler : ICommandHandler<UpdateScheduleCommand>
             throw new ArgumentException("Start date must be before end date.");
         }
         
-        var schedule = await _scheduleRepository.GetByIdAsync(new ScheduleId(command.Id));
+        var schedule = await _scheduleRepository.GetByIdAsync(command.Id);
         if (schedule == null)
         {
             throw new ArgumentException("Schedule not found.");

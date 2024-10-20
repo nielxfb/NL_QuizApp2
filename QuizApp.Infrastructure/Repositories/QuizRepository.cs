@@ -25,7 +25,7 @@ public class QuizRepository : IQuizRepository
         return await _context.Quizzes.ToListAsync();
     }
 
-    public async Task<Quiz?> GetByIdAsync(QuizId quizId)
+    public async Task<Quiz?> GetByIdAsync(Guid quizId)
     {
         return await _context.Quizzes
             .FindAsync(quizId);

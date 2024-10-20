@@ -18,7 +18,7 @@ public class AddQuizHandler : ICommandHandler<AddQuizCommand>
     {
         var quiz = new Domain.Entities.Quiz()
         {
-            Id = new QuizId(Guid.NewGuid()),
+            QuizId = Guid.NewGuid(),
             Title = command.Title,
         };
 

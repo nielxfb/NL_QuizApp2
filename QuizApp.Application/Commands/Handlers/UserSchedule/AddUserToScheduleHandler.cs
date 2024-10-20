@@ -18,8 +18,8 @@ public class AddUserToScheduleHandler : ICommandHandler<AddUserToScheduleCommand
     {
         var userSchedule = new Domain.Entities.UserSchedule
         {
-            UserId = new UserId(command.UserId),
-            ScheduleId = new ScheduleId(command.ScheduleId),
+            UserId = command.UserId,
+            ScheduleId = command.ScheduleId,
             Status = "Incomplete"
         };
         

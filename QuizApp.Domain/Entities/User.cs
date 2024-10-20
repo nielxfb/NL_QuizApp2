@@ -1,12 +1,14 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace QuizApp.Domain.Entities;
 
 public class User
 {
-    public UserId Id { get; set; } = null!;
-    public string FullName { get; set; } = string.Empty;
-    public string Initial { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty;
-    public ICollection<Response> Responses = new List<Response>();
-    public ICollection<UserSchedule> UserSchedules = new List<UserSchedule>();
+    [Key] [MaxLength(20)] public Guid UserId { get; set; } = Guid.Empty;
+    [MaxLength(50)] public string FullName { get; set; } = string.Empty;
+    [MaxLength(10)] public string Initial { get; set; } = string.Empty;
+    [MaxLength(255)] public string Password { get; set; } = string.Empty;
+    [MaxLength(10)] public string Role { get; set; } = string.Empty;
+    public ICollection<UserSchedule> UserSchedules { get; } = new List<UserSchedule>();
+    public ICollection<Response> Responses { get; } = new List<Response>();
 }

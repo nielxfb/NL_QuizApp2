@@ -20,13 +20,13 @@ public class GetUsersInScheduleHandler : IQueryHandler<GetUsersInScheduleQuery, 
 
     public async Task<UsersInScheduleDto> HandleAsync(GetUsersInScheduleQuery query)
     {
-        var schedule = await _scheduleRepository.GetByIdAsync(new ScheduleId(query.ScheduleId));
+        var schedule = await _scheduleRepository.GetByIdAsync(query.ScheduleId);
         if (schedule == null)
         {
             throw new ArgumentException("Schedule not found.");
         }
 
-        var users = await _repository.GetByScheduleIdAsync(new ScheduleId(query.ScheduleId));
+        var users = await _repository.GetByScheduleIdAsync(query.ScheduleId);
         if (users == null)
         {
             throw new ArgumentException("No users found in this schedule.");
@@ -37,7 +37,7 @@ public class GetUsersInScheduleHandler : IQueryHandler<GetUsersInScheduleQuery, 
             ScheduleId = query.ScheduleId,
             Users = users.Select(u => new UserDto
             {
-                UserId = u.Id.Value,
+                UserId = u.UserId,
                 FullName = u.FullName,
                 Initial = u.Initial,
             }).ToList(),

@@ -17,7 +17,7 @@ public class RemoveQuizHandler : ICommandHandler<RemoveQuizCommand>
 
     public async Task HandleAsync(RemoveQuizCommand command)
     {
-        var quiz = await _repository.GetByIdAsync(new QuizId(command.Id));
+        var quiz = await _repository.GetByIdAsync(command.Id);
         if (quiz == null)
         {
             throw new ArgumentException("Quiz not found.");

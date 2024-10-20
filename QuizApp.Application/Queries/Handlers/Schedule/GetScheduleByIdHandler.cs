@@ -20,13 +20,13 @@ public class GetScheduleByIdHandler : IQueryHandler<GetScheduleByIdQuery, Schedu
 
     public async Task<ScheduleDetailsDto> HandleAsync(GetScheduleByIdQuery query)
     {
-        var schedule = await _scheduleRepository.GetByIdAsync(new ScheduleId(query.Id));
+        var schedule = await _scheduleRepository.GetByIdAsync(query.Id);
         if (schedule == null)
         {
             throw new ArgumentException("Schedule not found.");
         }
 
-        var quiz = await _quizRepository.GetByIdAsync(new QuizId(schedule.QuizId.Value));
+        var quiz = await _quizRepository.GetByIdAsync(schedule.QuizId);
         if (quiz == null)
         {
             throw new ArgumentException("Quiz not found.");
@@ -34,7 +34,7 @@ public class GetScheduleByIdHandler : IQueryHandler<GetScheduleByIdQuery, Schedu
 
         return new ScheduleDetailsDto
         {
-            Id = schedule.Id.Value,
+            Id = schedule.ScheduleId,
             Quiz = quiz,
             StartDate = schedule.StartDate,
             EndDate = schedule.EndDate,

@@ -34,7 +34,7 @@ public class LoginUserHandler : IQueryHandler<LoginUserQuery, UserDetailsDto>
             throw new ArgumentException("Invalid initial or password.");
         }
 
-        var token = _jwtTokenService.GenerateToken(user.Id.Value.ToString(), user.Role);
+        var token = _jwtTokenService.GenerateToken(user.UserId.ToString(), user.Role);
         
         return new UserDetailsDto
         {
