@@ -104,6 +104,7 @@ builder.Services.AddScoped<IQueryHandler<GetQuizByIdQuery, QuizDetailsDto>, GetQ
 builder.Services.AddScoped<IQueryHandler<GetSchedulesQuery, List<ScheduleDetailsDto>>, GetSchedulesHandler>();
 builder.Services.AddScoped<IQueryHandler<GetScheduleByIdQuery, ScheduleDetailsDto>, GetScheduleByIdHandler>();
 builder.Services.AddScoped<IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto>, GetUsersInScheduleHandler>();
+builder.Services.AddScoped<IQueryHandler<GetUserSchedulesQuery, UserSchedulesDto>, GetUserSchedulesHandler>();
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {

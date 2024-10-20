@@ -14,11 +14,15 @@ namespace QuizApp.WebAPI.Controllers
     {
         private readonly ICommandHandler<AddUserToScheduleCommand> _addUserToScheduleHandler;
         private readonly IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> _getUsersInScheduleHandler;
+        private readonly IQueryHandler<GetUserSchedulesQuery, UserSchedulesDto> _getUserSchedulesHandler;
 
-        public UserScheduleController(ICommandHandler<AddUserToScheduleCommand> addUserToScheduleHandler, IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> getUsersInScheduleHandler)
+        public UserScheduleController(ICommandHandler<AddUserToScheduleCommand> addUserToScheduleHandler,
+            IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> getUsersInScheduleHandler,
+            IQueryHandler<GetUserSchedulesQuery, UserSchedulesDto> getUserSchedulesHandler)
         {
             _addUserToScheduleHandler = addUserToScheduleHandler;
             _getUsersInScheduleHandler = getUsersInScheduleHandler;
+            _getUserSchedulesHandler = getUserSchedulesHandler;
         }
 
         [HttpGet("get-users-in-schedule")]
@@ -35,7 +39,22 @@ namespace QuizApp.WebAPI.Controllers
                 return BadRequest(ex);
             }
         }
-        
+
+        [HttpGet("get-user-schedules")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetUserSchedules([FromQuery] GetUserSchedulesDto dto)
+        {
+            try
+            {
+                var userSchedules = await _getUserSchedulesHandler.HandleAsync(new GetUserSchedulesQuery(dto));
+                return Ok(userSchedules);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
         [HttpPost("add-user-to-schedule")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddUserToSchedule([FromBody] AddUserToScheduleDto dto)
@@ -44,7 +63,7 @@ namespace QuizApp.WebAPI.Controllers
             {
                 return BadRequest("Invalid user or schedule id.");
             }
-            
+
             try
             {
                 await _addUserToScheduleHandler.HandleAsync(new AddUserToScheduleCommand(dto));
