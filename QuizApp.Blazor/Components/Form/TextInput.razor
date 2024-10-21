@@ -1,0 +1,24 @@
+<div class="form-group">
+    <label for="@Id" class="form-label">@Label</label>
+    <input @bind="Value" 
+           type="@InputType" 
+           class="form-control" 
+           id="@Id" 
+           placeholder="@Placeholder"
+           @oninput="HandleInput"/>
+</div>
+
+@code {
+    [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString();
+    [Parameter] public string Label { get; set; }
+    [Parameter] public string Placeholder { get; set; }
+    [Parameter] public string InputType { get; set; } = "text";
+    [Parameter] public string Value { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        Value = e.Value.ToString();
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

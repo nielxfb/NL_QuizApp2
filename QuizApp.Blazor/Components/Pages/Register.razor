@@ -1,0 +1,30 @@
+@page "/auth/register"
+@using QuizApp.Application.DTOs.User
+@using QuizApp.Blazor.Components.Form
+
+<PageTitle>Quiz App - Register</PageTitle>
+
+<div class="w-25 container-fluid rounded-3 d-flex flex-column shadow-lg py-lg-5 px-lg-5 gap-4">
+    <h2>Register Page</h2>
+
+    <TextInput Label="Full Name" Placeholder="Enter your name" @bind-Value="FullName" />
+    <TextInput Label="Initial" Placeholder="Enter your initial" @bind-Value="Initial" />
+    <TextInput Label="Password" Placeholder="Enter your password" InputType="password" @bind-Value="Password" />
+    
+    <button class="btn btn-primary" @onclick="Handle">Login</button>
+    
+    <a href="/auth/register">Don't have an account? Register here.</a>
+</div>
+
+@code {
+    private string FullName { get; set; }
+    private string Initial { get; set; }
+    private string Password { get; set; }
+    
+    private RegisterUserDto dto { get; set; }
+
+    private async Task Handle()
+    {
+        
+    }
+}
