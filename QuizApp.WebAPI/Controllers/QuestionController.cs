@@ -45,7 +45,7 @@ namespace QuizApp.WebAPI.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e);
+                return BadRequest(e.Message);
             }
         }
 
@@ -65,7 +65,7 @@ namespace QuizApp.WebAPI.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e);
+                return BadRequest(e.Message);
             }
         }
         
@@ -85,7 +85,7 @@ namespace QuizApp.WebAPI.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e);
+                return BadRequest(e.Message);
             }
         }
 
@@ -105,7 +105,7 @@ namespace QuizApp.WebAPI.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e);
+                return BadRequest(e.Message);
             }
         }
     }
