@@ -9,4 +9,5 @@ public interface IUserScheduleRepository
     Task UpdateAsync(UserSchedule userSchedule);
     Task<List<Schedule>> GetByUserIdAsync(Guid userId);
     Task<List<User>> GetByScheduleIdAsync(Guid scheduleId);
+    Task<UserSchedule?> GetByScheduleAndUserId(Guid userId, Guid scheduleId);
 }

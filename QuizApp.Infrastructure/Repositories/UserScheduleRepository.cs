@@ -47,4 +47,10 @@ public class UserScheduleRepository : IUserScheduleRepository
             .Where(u => u.UserSchedules.Any(us => us.ScheduleId == scheduleId))
             .ToListAsync();
     }
+
+    public async Task<UserSchedule?> GetByScheduleAndUserId(Guid userId, Guid scheduleId)
+    {
+        return await _context.UserSchedules
+            .FirstOrDefaultAsync(us => us.UserId == userId && us.ScheduleId == scheduleId);
+    }
 }

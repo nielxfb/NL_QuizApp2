@@ -97,6 +97,7 @@ builder.Services.AddScoped<ICommandHandler<AddScheduleCommand>, AddScheduleHandl
 builder.Services.AddScoped<ICommandHandler<UpdateScheduleCommand>, UpdateScheduleHandler>();
 builder.Services.AddScoped<ICommandHandler<RemoveScheduleCommand>, RemoveScheduleHandler>();
 builder.Services.AddScoped<ICommandHandler<AddUserToScheduleCommand>, AddUserToScheduleHandler>();
+builder.Services.AddScoped<ICommandHandler<RemoveUserFromScheduleCommand>, RemoveUserFromScheduleHandler>();
 
 builder.Services.AddScoped<IQueryHandler<LoginUserQuery, UserDetailsDto>, LoginUserHandler>();
 builder.Services.AddScoped<IQueryHandler<GetQuizzesQuery, List<QuizDetailsDto>>, GetQuizzesHandler>();

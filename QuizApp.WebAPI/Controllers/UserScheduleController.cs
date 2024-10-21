@@ -13,14 +13,14 @@ namespace QuizApp.WebAPI.Controllers
     public class UserScheduleController : ControllerBase
     {
         private readonly ICommandHandler<AddUserToScheduleCommand> _addUserToScheduleHandler;
+        private readonly ICommandHandler<RemoveUserFromScheduleCommand> _removeUserFromScheduleHandler;
         private readonly IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> _getUsersInScheduleHandler;
         private readonly IQueryHandler<GetUserSchedulesQuery, UserSchedulesDto> _getUserSchedulesHandler;
 
-        public UserScheduleController(ICommandHandler<AddUserToScheduleCommand> addUserToScheduleHandler,
-            IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> getUsersInScheduleHandler,
-            IQueryHandler<GetUserSchedulesQuery, UserSchedulesDto> getUserSchedulesHandler)
+        public UserScheduleController(ICommandHandler<AddUserToScheduleCommand> addUserToScheduleHandler, ICommandHandler<RemoveUserFromScheduleCommand> removeUserFromScheduleHandler, IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> getUsersInScheduleHandler, IQueryHandler<GetUserSchedulesQuery, UserSchedulesDto> getUserSchedulesHandler)
         {
             _addUserToScheduleHandler = addUserToScheduleHandler;
+            _removeUserFromScheduleHandler = removeUserFromScheduleHandler;
             _getUsersInScheduleHandler = getUsersInScheduleHandler;
             _getUserSchedulesHandler = getUserSchedulesHandler;
         }
@@ -67,6 +67,26 @@ namespace QuizApp.WebAPI.Controllers
             try
             {
                 await _addUserToScheduleHandler.HandleAsync(new AddUserToScheduleCommand(dto));
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
+        [HttpDelete("remove-user-from-schedule")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RemoveUserFromSchedule([FromBody] RemoveUserFromScheduleDto dto)
+        {
+            if (dto.UserId == Guid.Empty || dto.ScheduleId == Guid.Empty)
+            {
+                return BadRequest("Invalid user or schedule id.");
+            }
+            
+            try
+            {
+                await _removeUserFromScheduleHandler.HandleAsync(new RemoveUserFromScheduleCommand(dto));
                 return Ok();
             }
             catch (Exception ex)
