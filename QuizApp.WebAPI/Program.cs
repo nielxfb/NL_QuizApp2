@@ -19,6 +19,7 @@ using QuizApp.Application.Commands.UserSchedule;
 using QuizApp.Application.DTOs.Option;
 using QuizApp.Application.DTOs.Question;
 using QuizApp.Application.DTOs.Quiz;
+using QuizApp.Application.DTOs.Response;
 using QuizApp.Application.DTOs.Schedule;
 using QuizApp.Application.DTOs.User;
 using QuizApp.Application.DTOs.UserSchedule;
@@ -26,12 +27,14 @@ using QuizApp.Application.Interfaces.Handlers;
 using QuizApp.Application.Queries.Handlers.Option;
 using QuizApp.Application.Queries.Handlers.Question;
 using QuizApp.Application.Queries.Handlers.Quiz;
+using QuizApp.Application.Queries.Handlers.Response;
 using QuizApp.Application.Queries.Handlers.Schedule;
 using QuizApp.Application.Queries.Handlers.User;
 using QuizApp.Application.Queries.Handlers.UserSchedule;
 using QuizApp.Application.Queries.Option;
 using QuizApp.Application.Queries.Question;
 using QuizApp.Application.Queries.Quiz;
+using QuizApp.Application.Queries.Response;
 using QuizApp.Application.Queries.Schedule;
 using QuizApp.Application.Queries.User;
 using QuizApp.Application.Queries.UserSchedule;
@@ -98,6 +101,7 @@ builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddScoped<IUserScheduleRepository, UserScheduleRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IOptionRepository, OptionRepository>();
+builder.Services.AddScoped<IResponseRepository, ResponseRepository>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
@@ -126,6 +130,7 @@ builder.Services.AddScoped<IQueryHandler<GetUsersInScheduleQuery, UsersInSchedul
 builder.Services.AddScoped<IQueryHandler<GetUserSchedulesQuery, UserSchedulesDto>, GetUserSchedulesHandler>();
 builder.Services.AddScoped<IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>>, GetQuestionsInQuizHandler>();
 builder.Services.AddScoped<IQueryHandler<GetByQuestionIdQuery, List<OptionDto>>, GetByQuestionIdHandler>();
+builder.Services.AddScoped<IQueryHandler<GetUserResponsesInQuizQuery, ResponseDto>, GetUserResponsesInQuizHandler>();
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
