@@ -17,10 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Controllers\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\QuizApp.Application\QuizApp.Application.csproj" />
       <ProjectReference Include="..\QuizApp.Infrastructure\QuizApp.Infrastructure.csproj" />
     </ItemGroup>
