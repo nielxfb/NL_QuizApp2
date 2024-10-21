@@ -26,16 +26,18 @@ public class ResponseRepository : IResponseRepository
         return _context.SaveChangesAsync();
     }
 
-    public Task RemoveAsync(Response response)
-    {
-        _context.Responses.Remove(response);
-        return _context.SaveChangesAsync();
-    }
-
     public async Task<List<Response>> GetUserResponsesInQuizAsync(Guid userId, Guid quizId)
     {
         return await _context.Responses
             .Where(r => r.UserId == userId && r.QuizId == quizId)
+            .Include(r => r.Option)
+            .Include(r => r.Question)
             .ToListAsync();
+    }
+
+    public Task<Response?> GetByIdAsync(Guid responseId)
+    {
+        return _context.Responses
+            .FirstOrDefaultAsync(r => r.ResponseId == responseId);
     }
 }

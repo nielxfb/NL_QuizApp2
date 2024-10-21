@@ -4,15 +4,18 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using QuizApp.Application.Commands;
 using QuizApp.Application.Commands.Handlers.Option;
 using QuizApp.Application.Commands.Handlers.Question;
 using QuizApp.Application.Commands.Handlers.Quiz;
+using QuizApp.Application.Commands.Handlers.Response;
 using QuizApp.Application.Commands.Handlers.Schedule;
 using QuizApp.Application.Commands.Handlers.User;
 using QuizApp.Application.Commands.Handlers.UserSchedule;
 using QuizApp.Application.Commands.Option;
 using QuizApp.Application.Commands.Question;
 using QuizApp.Application.Commands.Quiz;
+using QuizApp.Application.Commands.Response;
 using QuizApp.Application.Commands.Schedule;
 using QuizApp.Application.Commands.User;
 using QuizApp.Application.Commands.UserSchedule;
@@ -120,6 +123,8 @@ builder.Services.AddScoped<ICommandHandler<RemoveQuestionCommand>, RemoveQuestio
 builder.Services.AddScoped<ICommandHandler<AddOptionCommand>, AddOptionHandler>();
 builder.Services.AddScoped<ICommandHandler<RemoveOptionCommand>, RemoveOptionHandler>();
 builder.Services.AddScoped<ICommandHandler<UpdateOptionCommand>, UpdateOptionHandler>();
+builder.Services.AddScoped<ICommandHandler<AddResponseCommand>, AddResponseHandler>();
+builder.Services.AddScoped<ICommandHandler<UpdateResponseCommand>, UpdateResponseHandler>();
 
 builder.Services.AddScoped<IQueryHandler<LoginUserQuery, UserDetailsDto>, LoginUserHandler>();
 builder.Services.AddScoped<IQueryHandler<GetQuizzesQuery, List<QuizDetailsDto>>, GetQuizzesHandler>();
