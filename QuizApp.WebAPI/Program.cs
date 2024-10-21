@@ -4,23 +4,28 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using QuizApp.Application.Commands.Handlers.Question;
 using QuizApp.Application.Commands.Handlers.Quiz;
 using QuizApp.Application.Commands.Handlers.Schedule;
 using QuizApp.Application.Commands.Handlers.User;
 using QuizApp.Application.Commands.Handlers.UserSchedule;
+using QuizApp.Application.Commands.Question;
 using QuizApp.Application.Commands.Quiz;
 using QuizApp.Application.Commands.Schedule;
 using QuizApp.Application.Commands.User;
 using QuizApp.Application.Commands.UserSchedule;
+using QuizApp.Application.DTOs.Question;
 using QuizApp.Application.DTOs.Quiz;
 using QuizApp.Application.DTOs.Schedule;
 using QuizApp.Application.DTOs.User;
 using QuizApp.Application.DTOs.UserSchedule;
 using QuizApp.Application.Interfaces.Handlers;
+using QuizApp.Application.Queries.Handlers.Question;
 using QuizApp.Application.Queries.Handlers.Quiz;
 using QuizApp.Application.Queries.Handlers.Schedule;
 using QuizApp.Application.Queries.Handlers.User;
 using QuizApp.Application.Queries.Handlers.UserSchedule;
+using QuizApp.Application.Queries.Question;
 using QuizApp.Application.Queries.Quiz;
 using QuizApp.Application.Queries.Schedule;
 using QuizApp.Application.Queries.User;
@@ -86,6 +91,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IQuizRepository, QuizRepository>();
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddScoped<IUserScheduleRepository, UserScheduleRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
@@ -98,6 +104,9 @@ builder.Services.AddScoped<ICommandHandler<UpdateScheduleCommand>, UpdateSchedul
 builder.Services.AddScoped<ICommandHandler<RemoveScheduleCommand>, RemoveScheduleHandler>();
 builder.Services.AddScoped<ICommandHandler<AddUserToScheduleCommand>, AddUserToScheduleHandler>();
 builder.Services.AddScoped<ICommandHandler<RemoveUserFromScheduleCommand>, RemoveUserFromScheduleHandler>();
+builder.Services.AddScoped<ICommandHandler<AddQuestionCommand>, AddQuestionHandler>();
+builder.Services.AddScoped<ICommandHandler<UpdateQuestionCommand>, UpdateQuestionHandler>();
+builder.Services.AddScoped<ICommandHandler<RemoveQuestionCommand>, RemoveQuestionHandler>();
 
 builder.Services.AddScoped<IQueryHandler<LoginUserQuery, UserDetailsDto>, LoginUserHandler>();
 builder.Services.AddScoped<IQueryHandler<GetQuizzesQuery, List<QuizDetailsDto>>, GetQuizzesHandler>();
@@ -106,6 +115,7 @@ builder.Services.AddScoped<IQueryHandler<GetSchedulesQuery, List<ScheduleDetails
 builder.Services.AddScoped<IQueryHandler<GetScheduleByIdQuery, ScheduleDetailsDto>, GetScheduleByIdHandler>();
 builder.Services.AddScoped<IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto>, GetUsersInScheduleHandler>();
 builder.Services.AddScoped<IQueryHandler<GetUserSchedulesQuery, UserSchedulesDto>, GetUserSchedulesHandler>();
+builder.Services.AddScoped<IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>>, GetQuestionsInQuizHandler>();
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
