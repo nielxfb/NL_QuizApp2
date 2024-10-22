@@ -1,10 +1,37 @@
 ﻿@page "/"
+@using QuizApp.Blazor2.Services
 @layout NavbarLayout
+
+@inject UserService UserService
+@inject NavigationManager Nav
 
 <PageTitle>Home</PageTitle>
 
 <h1>
-    Hello, world!
+    Hello, @user.FullName!
 </h1>
 
 Welcome to your new app.
+
+@code {
+
+    private UserDetailsDto user { get; set; } = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var response = await UserService.GetUserDetails();
+
+            if (!response.IsSuccess)
+            {
+                Nav.NavigateTo("/Login");
+                return;
+            }
+
+            user = response.Data!;
+            StateHasChanged();
+        }
+    }
+
+}

@@ -14,6 +14,7 @@ builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5160/") });
 builder.Services.AddScoped<ICookie, Cookie>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<QuizService>();
 
 var app = builder.Build();
 

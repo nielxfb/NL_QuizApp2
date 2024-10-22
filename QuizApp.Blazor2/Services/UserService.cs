@@ -96,22 +96,16 @@ public class UserService
         var user = await _session.GetItemAsync<UserDetailsDto>("user");
         var cookie = await _cookie.GetValue("user_cookie");
 
-        if (user == null && cookie == "")
+        if (user == null || cookie == "")
         {
+            await _cookie.SetValue("user_cookie", "");
+            await _session.RemoveItemAsync("user");
             return new Response<UserDetailsDto>
             {
                 IsSuccess = false,
                 Message = "User not logged in.",
             };
         }
-
-        if (cookie == "")
-            return new Response<UserDetailsDto>
-            {
-                IsSuccess = true,
-                Message = "User logged in.",
-                Data = user,
-            };
         
         var response = await _httpClient.PostAsJsonAsync("api/User/login-by-cookie", new { Token = cookie });
         if (!response.IsSuccessStatusCode)

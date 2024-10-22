@@ -1,0 +1,34 @@
+@page "/UpdateQuiz/{Id}"
+@layout NavbarLayout
+
+@using QuizApp.Application.DTOs.Quiz
+@using QuizApp.Blazor2.Services
+
+@inject QuizService QuizService
+
+<h3>UpdateQuiz</h3>
+<h3 class="text-danger">@ErrorMessage</h3>
+
+@code {
+    [Parameter] public string Id { get; set; } = string.Empty;
+    private QuizDetailsDto Quiz { get; set; } = new();
+    private string ErrorMessage { get; set; } = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var response = await QuizService.GetQuizById(Id);
+            if (!response.IsSuccess)
+            {
+                ErrorMessage = response.Message;
+                StateHasChanged();
+                return;
+            }
+
+            Quiz = response.Data!;
+            StateHasChanged();
+        }
+    }
+
+}

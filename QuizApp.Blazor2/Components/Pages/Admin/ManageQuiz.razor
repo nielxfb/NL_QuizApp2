@@ -1,0 +1,89 @@
+@page "/ManageQuiz"
+@using QuizApp.Application.DTOs.Quiz
+@using QuizApp.Blazor2.Services
+@layout NavbarLayout
+
+@inject UserService UserService
+@inject NavigationManager Nav
+@inject QuizService QuizService
+
+<Loading IsLoading="@_isLoading" />
+
+<h3>Manage Quiz</h3>
+
+<h3 class="text-danger">@ErrorMessage</h3>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th scope="col">No.</th>
+        <th scope="col">Title</th>
+        <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (Quizzes.Count == 0)
+    {
+        <p>There are no quiz yet.</p>
+    }
+    @foreach (var quiz in Quizzes)
+    {
+        <tr>
+            <th scope="row">@(Quizzes.IndexOf(quiz) + 1)</th>
+            <td>@quiz.Title</td>
+            <td>
+                <button class="btn btn-primary" @onclick="() => EditQuiz(quiz.Id.ToString())">Edit</button>
+                <button class="btn btn-danger">Delete</button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@code {
+
+    private UserDetailsDto User { get; set; } = new();
+    private List<QuizDetailsDto> Quizzes { get; set; } = new();
+    private string ErrorMessage { get; set; } = string.Empty;
+    private bool _isLoading = true;
+    
+    private void EditQuiz(string id)
+    {
+        Nav.NavigateTo($"/UpdateQuiz/{id}");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var response = await UserService.GetUserDetails();
+
+            if (!response.IsSuccess)
+            {
+                Nav.NavigateTo("/Login");
+                return;
+            }
+
+            User = response.Data!;
+
+            if (User.Role != "Admin")
+            {
+                Nav.NavigateTo("/");
+            }
+
+            var quizzesResponse = await QuizService.GetQuizzes();
+            if (!quizzesResponse.IsSuccess)
+            {
+                Console.WriteLine("Masuk bro");
+                ErrorMessage = quizzesResponse.Message;
+                return;
+            }
+
+            Quizzes = quizzesResponse.Data!;
+            Console.WriteLine($"Dapet nih: {Quizzes.Count}");
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+}
