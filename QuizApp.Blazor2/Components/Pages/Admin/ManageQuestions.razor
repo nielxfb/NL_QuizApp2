@@ -3,6 +3,7 @@
 
 @inject QuizService QuizService
 @inject QuestionService QuestionService
+@inject HttpClient HttpClient
 
 <Loading IsLoading="@_isLoading"/>
 
@@ -15,9 +16,15 @@
     {
         <div class="border rounded-3 shadow-sm py-lg-3 px-lg-4">
 
+            @if (!string.IsNullOrEmpty(question.ImageUrl))
+            {
+                <img src="@($"{HttpClient.BaseAddress}{question.ImageUrl}")" class="rounded mx-auto d-block" alt="Question Image"/>
+            }
+
             <div class="d-flex justify-content-between align-items-center p-2">
                 <h5>@question.QuestionText</h5>
                 <div>
+                    <button class="btn btn-info" @onclick="() => AddImage(question)">Add Image</button>
                     <button class="btn btn-primary" @onclick="() => EditQuestion(question)" type="button">Edit Question</button>
                     <button class="btn btn-danger" @onclick="() => DeleteQuestion(question.QuestionId.ToString())">Delete Question</button>
                 </div>
@@ -36,6 +43,8 @@
                         <p class="p-0 m-0">@option.OptionText</p>
                     </div>
                 }
+                
+                <button class="btn btn-primary">Add Option</button>
             </div>
 
         </div>
@@ -44,6 +53,7 @@
     <button class="btn btn-primary" @onclick="AddQuestion">Add Question</button>
 </div>
 
+<AddQuestionImage Question="@SelectedQuestion" IsVisible="IsAddImageModalVisible" OnClose="OnImageModalClose"/>
 <AddQuestionModal Question="@NewQuestion" IsVisible="IsAddModalVisible" OnClose="OnAddModalClose" OnSave="OnAddModalSave"/>
 <UpdateQuestionModal Question="@SelectedQuestion" IsVisible="IsUpdateModalVisible" OnClose="OnUpdateModalClose" OnSave="OnUpdateModalSave"/>
 
@@ -56,7 +66,14 @@
     private string ErrorMessage { get; set; } = string.Empty;
     private bool IsUpdateModalVisible { get; set; }
     private bool IsAddModalVisible { get; set; }
+    private bool IsAddImageModalVisible { get; set; }
     private bool _isLoading = true;
+
+    private void AddImage(QuestionDto question)
+    {
+        SelectedQuestion = question;
+        IsAddImageModalVisible = true;
+    }
 
     private void AddQuestion()
     {
@@ -133,11 +150,19 @@
         StateHasChanged();
     }
 
+    private async Task OnImageModalClose()
+    {
+        SelectedQuestion = new();
+        IsAddImageModalVisible = false;
+        await Refresh();
+        StateHasChanged();
+    }
+
     private async Task DeleteQuestion(string questionId)
     {
         _isLoading = true;
         StateHasChanged();
-        
+
         var response = await QuestionService.DeleteQuestion(questionId);
         if (!response.IsSuccess)
         {

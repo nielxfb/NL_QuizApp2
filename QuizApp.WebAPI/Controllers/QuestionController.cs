@@ -19,16 +19,15 @@ public class QuestionController : ControllerBase
     private readonly ICommandHandler<AddQuestionCommand> _addCommandHandler;
     private readonly ICommandHandler<RemoveQuestionCommand> _removeQuestionHandler;
     private readonly ICommandHandler<UpdateQuestionCommand> _updateQuestionHandler;
+    private readonly ICommandHandler<AddImageUrlCommand> _addImageUrlHandler;
     private readonly IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>> _getQuestionsInQuizHandler;
 
-    public QuestionController(ICommandHandler<AddQuestionCommand> addCommandHandler,
-        ICommandHandler<RemoveQuestionCommand> removeQuestionHandler,
-        ICommandHandler<UpdateQuestionCommand> updateQuestionHandler,
-        IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>> getQuestionsInQuizHandler)
+    public QuestionController(ICommandHandler<AddQuestionCommand> addCommandHandler, ICommandHandler<RemoveQuestionCommand> removeQuestionHandler, ICommandHandler<UpdateQuestionCommand> updateQuestionHandler, ICommandHandler<AddImageUrlCommand> addImageUrlHandler, IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>> getQuestionsInQuizHandler)
     {
         _addCommandHandler = addCommandHandler;
         _removeQuestionHandler = removeQuestionHandler;
         _updateQuestionHandler = updateQuestionHandler;
+        _addImageUrlHandler = addImageUrlHandler;
         _getQuestionsInQuizHandler = getQuestionsInQuizHandler;
     }
 
@@ -93,6 +92,23 @@ public class QuestionController : ControllerBase
         {
             await _updateQuestionHandler.HandleAsync(new UpdateQuestionCommand(dto));
             return Ok("Successfully updated question!");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+    
+    [HttpPost("add-image-url")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AddImageUrl([FromBody] AddImageUrlDto dto)
+    {
+        if (dto.QuestionId == Guid.Empty || dto.ImageUrl == "") return BadRequest("All fields are required");
+
+        try
+        {
+            await _addImageUrlHandler.HandleAsync(new AddImageUrlCommand(dto));
+            return Ok("Successfully added image URL!");
         }
         catch (Exception e)
         {

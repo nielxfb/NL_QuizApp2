@@ -34,14 +34,17 @@ namespace QuizApp.WebAPI.Controllers
                 Directory.CreateDirectory(uploadsPath);
             }
 
-            var filePath = Path.Combine(uploadsPath, Guid.NewGuid().ToString() + extension);
+            var uniqueFileName = Guid.NewGuid() + extension;
+            var filePath = Path.Combine(uploadsPath, uniqueFileName);
 
             await using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            return Ok(new { FilePath = filePath });
+            var relativePath = Path.Combine("uploads", uniqueFileName);
+
+            return Ok(new { FilePath = relativePath });
         }
 
     }

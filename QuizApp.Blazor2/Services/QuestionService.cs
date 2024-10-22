@@ -176,4 +176,39 @@ public class QuestionService
             };
         }
     }
+
+    public async Task<Response<String>> AddImageUrl(AddImageUrlDto dto)
+    {
+        var cookie = await _cookie.GetValue("user_cookie");
+
+        if (cookie == "")
+        {
+            return new Response<string>
+            {
+                IsSuccess = false,
+                Message = "You are not authorized to perform this action",
+            };
+        }
+
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cookie);
+
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/Question/add-image-url", dto);
+            var message = await response.Content.ReadAsStringAsync();
+            return new Response<string>
+            {
+                IsSuccess = response.IsSuccessStatusCode,
+                Message = message,
+            };
+        }
+        catch (Exception e)
+        {
+            return new Response<string>
+            {
+                IsSuccess = false,
+                Message = $"An error occurred: {e.Message}",
+            };
+        }
+    }
 }

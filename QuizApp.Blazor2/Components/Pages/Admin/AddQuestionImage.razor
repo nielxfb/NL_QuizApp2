@@ -1,0 +1,102 @@
+@inject HttpClient HttpClient
+@inject QuestionService QuestionService
+
+@if (IsVisible)
+{
+    <div class="modal fade show d-block" style="display:block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Image</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Upload Image Here</label>
+                        <InputFile class="form-control" OnChange="HandleSelected"/>
+                    </div>
+                </div>
+                <p class="@(IsSuccess ? "text-primary" : "text-danger")">@Message</p>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="UploadImage" disabled="@_isUploadDisabled">Upload Image</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public QuestionDto Question { get; set; } = new();
+    [Parameter] public EventCallback OnClose { get; set; }
+    private IBrowserFile? _imageFile;
+    private bool _isUploadDisabled = true;
+    private string Message { get; set; } = string.Empty;
+    private bool IsSuccess { get; set; }
+
+    // Handle file selection
+    private void HandleSelected(InputFileChangeEventArgs e)
+    {
+        _imageFile = e.File;
+        _isUploadDisabled = _imageFile == null;
+    }
+
+    // Upload image to API
+    private async Task UploadImage()
+    {
+        if (_imageFile == null)
+        {
+            IsSuccess = false;
+            Message = "Please select an image to upload";
+            return;
+        }
+        
+        try
+        {
+            var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(_imageFile.OpenReadStream(maxAllowedSize: 1024 * 1024 * 10)); // Limit to 10MB
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(_imageFile.ContentType);
+
+            content.Add(fileContent, "file", _imageFile.Name);
+
+            var response = await HttpClient.PostAsync("/api/Image/upload-image", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                IsSuccess = false;
+                Message = await response.Content.ReadAsStringAsync();
+                return;
+            }
+            
+            var message = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(message);
+
+            var dto = await response.Content.ReadFromJsonAsync<FilePathDto>();
+            var addImageUrlDto = new AddImageUrlDto
+            {
+                ImageUrl = dto!.FilePath,
+                QuestionId = Question.QuestionId
+            };
+            var imageResponse = await QuestionService.AddImageUrl(addImageUrlDto);
+            IsSuccess = imageResponse.IsSuccess;
+            Message = imageResponse.Message;
+        }
+        catch (Exception ex)
+        {
+            IsSuccess = false;
+            Message = $"An error occurred: {ex.Message}";
+        }
+    }
+
+    private void Close()
+    {
+        OnClose.InvokeAsync();
+    }
+    
+    private class FilePathDto
+    {
+        public string FilePath { get; set; } = string.Empty;
+    }
+}

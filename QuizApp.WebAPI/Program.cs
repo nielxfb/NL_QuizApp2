@@ -52,8 +52,13 @@ using QuizApp.Domain.Interfaces;
 using QuizApp.Infrastructure.Persistence;
 using QuizApp.Infrastructure.Repositories;
 
-var builder = WebApplication.CreateBuilder(args);
+var options = new WebApplicationOptions
+{
+    WebRootPath = "wwwroot",
+    Args = args
+};
 
+var builder = WebApplication.CreateBuilder(options);
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -125,6 +130,7 @@ builder.Services.AddScoped<ICommandHandler<RemoveUserFromScheduleCommand>, Remov
 builder.Services.AddScoped<ICommandHandler<AddQuestionCommand>, AddQuestionHandler>();
 builder.Services.AddScoped<ICommandHandler<UpdateQuestionCommand>, UpdateQuestionHandler>();
 builder.Services.AddScoped<ICommandHandler<RemoveQuestionCommand>, RemoveQuestionHandler>();
+builder.Services.AddScoped<ICommandHandler<AddImageUrlCommand>, AddImageUrlHandler>();
 builder.Services.AddScoped<ICommandHandler<AddOptionCommand>, AddOptionHandler>();
 builder.Services.AddScoped<ICommandHandler<RemoveOptionCommand>, RemoveOptionHandler>();
 builder.Services.AddScoped<ICommandHandler<UpdateOptionCommand>, UpdateOptionHandler>();
