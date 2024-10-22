@@ -1,5 +1,4 @@
 ﻿@page "/"
-@using QuizApp.Blazor2.Services
 @layout NavbarLayout
 
 @inject UserService UserService
@@ -8,14 +7,14 @@
 <PageTitle>Home</PageTitle>
 
 <h1>
-    Hello, @user.FullName!
+    Hello, @User.FullName!
 </h1>
 
 Welcome to your new app.
 
 @code {
 
-    private UserDetailsDto user { get; set; } = new();
+    private UserDetailsDto User { get; set; } = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -29,7 +28,7 @@ Welcome to your new app.
                 return;
             }
 
-            user = response.Data!;
+            User = response.Data!;
             StateHasChanged();
         }
     }

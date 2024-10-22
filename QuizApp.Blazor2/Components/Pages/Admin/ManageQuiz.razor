@@ -1,17 +1,15 @@
 @page "/ManageQuiz"
-@using QuizApp.Application.DTOs.Quiz
-@using QuizApp.Blazor2.Services
 @layout NavbarLayout
 
 @inject UserService UserService
 @inject NavigationManager Nav
 @inject QuizService QuizService
 
-<Loading IsLoading="@_isLoading" />
+<Loading IsLoading="@_isLoading"/>
 
 <h3>Manage Quiz</h3>
 
-<h3 class="text-danger">@ErrorMessage</h3>
+<p class="@(IsSuccess ? "text-primary" : "text-danger")">@Message</p>
 
 <table class="table table-striped">
     <thead>
@@ -33,23 +31,44 @@
             <td>@quiz.Title</td>
             <td>
                 <button class="btn btn-primary" @onclick="() => EditQuiz(quiz.Id.ToString())">Edit</button>
-                <button class="btn btn-danger">Delete</button>
+                <button class="btn btn-danger" @onclick="() => DeleteQuiz(quiz.Id.ToString())">Delete</button>
             </td>
         </tr>
     }
     </tbody>
 </table>
 
+<button class="btn btn-primary" @onclick="AddQuiz">Add New Quiz</button>
+
 @code {
 
     private UserDetailsDto User { get; set; } = new();
     private List<QuizDetailsDto> Quizzes { get; set; } = new();
-    private string ErrorMessage { get; set; } = string.Empty;
+    private string Message { get; set; } = string.Empty;
     private bool _isLoading = true;
-    
+    private bool IsSuccess { get; set; } = true;
+
+    private void AddQuiz()
+    {
+        Nav.NavigateTo("/AddQuiz");
+    }
+
     private void EditQuiz(string id)
     {
         Nav.NavigateTo($"/UpdateQuiz/{id}");
+    }
+
+    private async Task DeleteQuiz(string id)
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        var response = await QuizService.RemoveQuiz(id);
+        IsSuccess = response.IsSuccess;
+        Message = response.Message;
+        
+        _isLoading = false;
+        StateHasChanged();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -70,20 +89,19 @@
             {
                 Nav.NavigateTo("/");
             }
-
-            var quizzesResponse = await QuizService.GetQuizzes();
-            if (!quizzesResponse.IsSuccess)
-            {
-                Console.WriteLine("Masuk bro");
-                ErrorMessage = quizzesResponse.Message;
-                return;
-            }
-
-            Quizzes = quizzesResponse.Data!;
-            Console.WriteLine($"Dapet nih: {Quizzes.Count}");
-            _isLoading = false;
-            StateHasChanged();
         }
+
+        var quizzesResponse = await QuizService.GetQuizzes();
+        if (!quizzesResponse.IsSuccess)
+        {
+            Message = quizzesResponse.Message;
+            return;
+        }
+
+        Quizzes = quizzesResponse.Data!;
+        _isLoading = false;
+        StateHasChanged();
     }
+
 
 }

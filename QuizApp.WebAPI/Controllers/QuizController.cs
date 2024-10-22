@@ -77,6 +77,8 @@ public class QuizController : ControllerBase
     {
         if (dto.Title == "") return BadRequest("Title cannot be empty");
 
+        if (dto.Title.Length > 20) return BadRequest("Title cannot be longer than 20 characters");
+
         try
         {
             await _addQuizHandler.HandleAsync(new AddQuizCommand(dto));
@@ -110,6 +112,8 @@ public class QuizController : ControllerBase
     public async Task<IActionResult> UpdateQuizAsync([FromBody] UpdateQuizDto dto)
     {
         if (dto.Id == Guid.Empty || dto.Title == "") return BadRequest("Id and Title cannot be empty");
+
+        if (dto.Title.Length > 20) return BadRequest("Title cannot be longer than 20 characters");
 
         try
         {

@@ -1,0 +1,33 @@
+@page "/AddQuiz"
+@layout NavbarLayout
+
+@inject QuizService QuizService
+
+<EditForm Model="@Quiz" class="d-flex flex-column w-25 gap-2" OnSubmit="Handle">
+
+    <h3>Add new Quiz</h3>
+
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+
+    <div class="form-group">
+        <label class="form-label mb-2">Title</label>
+        <InputText @bind-Value="Quiz.Title" class="form-control"/>
+    </div>
+
+    <p class="@(IsSuccess ? "text-primary" : "text-danger")">@Message</p>
+    <button class="btn btn-primary" type="submit">Add</button>
+</EditForm>
+
+@code {
+    private AddQuizDto Quiz { get; set; } = new();
+    private string Message { get; set; } = string.Empty;
+    private bool IsSuccess { get; set; } = true;
+
+    private async Task Handle()
+    {
+        var response = await QuizService.AddQuiz(Quiz);
+        IsSuccess = response.IsSuccess;
+        Message = response.Message;
+    }
+}

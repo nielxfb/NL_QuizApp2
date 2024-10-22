@@ -96,7 +96,7 @@ public class UserService
         var user = await _session.GetItemAsync<UserDetailsDto>("user");
         var cookie = await _cookie.GetValue("user_cookie");
 
-        if (user == null || cookie == "")
+        if (user == null && cookie == "")
         {
             await _cookie.SetValue("user_cookie", "");
             await _session.RemoveItemAsync("user");
@@ -106,32 +106,42 @@ public class UserService
                 Message = "User not logged in.",
             };
         }
-        
-        var response = await _httpClient.PostAsJsonAsync("api/User/login-by-cookie", new { Token = cookie });
-        if (!response.IsSuccessStatusCode)
+
+        if (cookie != "")
         {
-            await _cookie.SetValue("user_cookie", "");
-            return new Response<UserDetailsDto>
+            var response = await _httpClient.PostAsJsonAsync("api/User/login-by-cookie", new { Token = cookie });
+            if (!response.IsSuccessStatusCode)
             {
-                IsSuccess = false,
-                Message = "User not logged in",
-            };
+                await _cookie.SetValue("user_cookie", "");
+                return new Response<UserDetailsDto>
+                {
+                    IsSuccess = false,
+                    Message = "User not logged in",
+                };
+            }
+
+            user = await response.Content.ReadFromJsonAsync<UserDetailsDto>();
+            await _session.SetItemAsync("user", new
+            {
+                user!.UserId,
+                user.Initial,
+                user.FullName,
+                user.Role,
+            });
         }
 
-        user = await response.Content.ReadFromJsonAsync<UserDetailsDto>();
-        await _session.SetItemAsync("user", new
-        {
-            user!.UserId,
-            user.Initial,
-            user.FullName,
-            user.Role,
-        });
-
+        if (user != null)
+            return new Response<UserDetailsDto>
+            {
+                IsSuccess = true,
+                Message = "User logged in.",
+                Data = user,
+            };
+        
         return new Response<UserDetailsDto>
         {
-            IsSuccess = true,
-            Message = "User logged in.",
-            Data = user,
+            IsSuccess = false,
+            Message = "User not logged in.",
         };
     }
 

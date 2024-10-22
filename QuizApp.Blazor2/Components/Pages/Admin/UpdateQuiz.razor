@@ -1,18 +1,29 @@
 @page "/UpdateQuiz/{Id}"
 @layout NavbarLayout
 
-@using QuizApp.Application.DTOs.Quiz
-@using QuizApp.Blazor2.Services
-
 @inject QuizService QuizService
 
-<h3>UpdateQuiz</h3>
-<h3 class="text-danger">@ErrorMessage</h3>
+<EditForm Model="@Quiz" class="d-flex flex-column w-25 gap-2" OnSubmit="Handle">
+    
+    <h3>Update Quiz</h3>
+    
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+
+    <div class="form-group">
+        <label class="form-label mb-2">Title</label>
+        <InputText @bind-Value="Quiz.Title" class="form-control"/>
+    </div>
+
+    <p class="@(IsSuccess ? "text-primary" : "text-danger")">@Message</p>
+    <button class="btn btn-primary" type="submit">Update</button>
+</EditForm>
 
 @code {
     [Parameter] public string Id { get; set; } = string.Empty;
     private QuizDetailsDto Quiz { get; set; } = new();
-    private string ErrorMessage { get; set; } = string.Empty;
+    private string Message { get; set; } = string.Empty;
+    private bool IsSuccess { get; set; } = true;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -21,14 +32,28 @@
             var response = await QuizService.GetQuizById(Id);
             if (!response.IsSuccess)
             {
-                ErrorMessage = response.Message;
-                StateHasChanged();
+                IsSuccess = false;
+                Message = response.Message;
                 return;
             }
-
+            
             Quiz = response.Data!;
             StateHasChanged();
         }
+    }
+
+    private async Task Handle()
+    {
+        var dto = new UpdateQuizDto
+        {
+            Id = Quiz.Id,
+            Title = Quiz.Title
+        };
+        
+        var response = await QuizService.UpdateQuiz(dto);
+        IsSuccess = response.IsSuccess;
+        Message = response.Message;
+        StateHasChanged();
     }
 
 }
