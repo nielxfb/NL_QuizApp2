@@ -35,6 +35,7 @@ public class LoginUserHandler : IQueryHandler<LoginUserQuery, UserDetailsDto>
 
         return new UserDetailsDto
         {
+            UserId = user.UserId,
             FullName = user.FullName,
             Initial = user.Initial,
             Role = user.Role,

@@ -1,6 +1,79 @@
 @page "/Register"
-<h3>Register</h3>
+@using QuizApp.Blazor2.Services
+@layout CenterLayout
+
+@inject NavigationManager Nav
+@inject ICookie Cookie
+@inject ISessionStorageService Session
+@inject UserService UserService
+
+<PageTitle>Quiz App - Register</PageTitle>
+
+<Loading IsLoading="@_isLoading"/>
+
+<div class="w-auto container-fluid rounded-3 d-flex flex-column shadow-lg py-lg-5 px-lg-5 gap-4">
+    <h2>Register Page</h2>
+
+    <EditForm Model="@Model" OnSubmit="Handle" class="d-flex flex-column gap-2" FormName="LoginForm">
+        <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <InputText @bind-Value="Model.FullName" placeholder="Enter full name" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Initial</label>
+            <InputText @bind-Value="Model.Initial" placeholder="Enter initial" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Password</label>
+            <InputText @bind-Value="Model.Password" type="password" placeholder="Enter password" class="form-control"/>
+        </div>
+
+        <p class="text text-danger">@ErrorMessage</p>
+        <button class="btn btn-primary" type="submit">Register</button>
+    </EditForm>
+
+    <a href="/Login">Already have an account? Login here.</a>
+</div>
 
 @code {
-    
+    private RegisterUserDto Model { get; set; } = new();
+    private string ErrorMessage { get; set; } = string.Empty;
+    private bool _isLoading = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var cookie = await Cookie.GetValue("user_cookie");
+            var user = await Session.GetItemAsync<UserDetailsDto>("user");
+
+            if (user != null || cookie != "")
+            {
+                Nav.NavigateTo("/");
+            }
+        }
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task Handle()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        var response = await UserService.Register(Model);
+
+        if (response.IsSuccess)
+        {
+            Nav.NavigateTo("/Login");
+            return;
+        }
+
+        ErrorMessage = response.Message;
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
 }

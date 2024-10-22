@@ -1,4 +1,7 @@
+using Blazored.SessionStorage;
 using QuizApp.Blazor2.Components;
+using QuizApp.Blazor2.Services;
+using QuizApp.Blazor2.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,7 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddBlazoredSessionStorage();
+
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5160/") });
+builder.Services.AddScoped<ICookie, Cookie>();
+builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
 

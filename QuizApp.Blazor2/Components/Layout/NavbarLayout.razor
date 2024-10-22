@@ -1,0 +1,108 @@
+@using QuizApp.Blazor2.Components.Pages
+@inherits LayoutComponentBase
+
+@inject ISessionStorageService Session
+@inject ICookie Cookie
+@inject NavigationManager Nav
+@inject HttpClient HttpClient
+
+<Loading IsLoading="@_isLoading"/>
+
+<div class="page">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-lg-5 py-3">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">QuizApp</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+
+                    @if (_isAdmin)
+                    {
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="#">Manage Quiz</NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="#">Manage Schedules</NavLink>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="#">Take Quiz</NavLink>
+                        </li>
+                    }
+
+                    <li class="nav-item" @onclick="LogOut">
+                        <NavLink class="nav-link" href="#">Log Out</NavLink>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="p-lg-5">
+        @Body
+    </div>
+
+</div>
+
+@code {
+
+    private bool _isLoading = true;
+    private bool _isAdmin;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var cookie = await Cookie.GetValue("user_cookie");
+            var user = await Session.GetItemAsync<UserDetailsDto>("user");
+            if (user == null && cookie == "")
+            {
+                Nav.NavigateTo("/Login");
+                return;
+            }
+
+            if (cookie != "")
+            {
+                var response = await HttpClient.PostAsJsonAsync("api/User/login-by-cookie", new { Token = cookie });
+                if (!response.IsSuccessStatusCode)
+                {
+                    await Cookie.SetValue("user_cookie", "");
+                    Nav.NavigateTo("/Login");
+                    return;
+                }
+
+                user = await response.Content.ReadFromJsonAsync<UserDetailsDto>();
+                await Session.SetItemAsync("user", new
+                {
+                    user!.UserId,
+                    user.Initial,
+                    user.FullName,
+                    user.Role,
+                });
+            }
+
+            _isLoading = false;
+            StateHasChanged();
+
+            if (user!.Role == "Admin")
+            {
+                _isAdmin = true;
+            }
+        }
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task LogOut()
+    {
+        Console.WriteLine("Pencet log out");
+        await Session.RemoveItemAsync("user");
+        await Cookie.SetValue("user_cookie", "");
+        Nav.NavigateTo("/Login");
+    }
+
+}

@@ -132,6 +132,7 @@ builder.Services.AddScoped<ICommandHandler<AddResponseCommand>, AddResponseHandl
 builder.Services.AddScoped<ICommandHandler<UpdateResponseCommand>, UpdateResponseHandler>();
 
 builder.Services.AddScoped<IQueryHandler<LoginUserQuery, UserDetailsDto>, LoginUserHandler>();
+builder.Services.AddScoped<IQueryHandler<LoginByCookieQuery, UserDetailsDto>, LoginByCookieHandler>();
 builder.Services.AddScoped<IQueryHandler<GetQuizzesQuery, List<QuizDetailsDto>>, GetQuizzesHandler>();
 builder.Services.AddScoped<IQueryHandler<GetQuizByIdQuery, QuizDetailsDto>, GetQuizByIdHandler>();
 builder.Services.AddScoped<IQueryHandler<GetSchedulesQuery, List<ScheduleDetailsDto>>, GetSchedulesHandler>();

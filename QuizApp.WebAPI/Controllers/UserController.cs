@@ -20,12 +20,13 @@ public class UserController : ControllerBase
     private readonly ICommandHandler<RegisterUserCommand> _registerUserHandler;
 
     private readonly IQueryHandler<LoginUserQuery, UserDetailsDto> _loginUserHandler;
+    private readonly IQueryHandler<LoginByCookieQuery, UserDetailsDto> _loginByCookieHandler;
 
-    public UserController(ICommandHandler<RegisterUserCommand> registerUserHandler,
-        IQueryHandler<LoginUserQuery, UserDetailsDto> loginUserHandler)
+    public UserController(ICommandHandler<RegisterUserCommand> registerUserHandler, IQueryHandler<LoginUserQuery, UserDetailsDto> loginUserHandler, IQueryHandler<LoginByCookieQuery, UserDetailsDto> loginByCookieHandler)
     {
         _registerUserHandler = registerUserHandler;
         _loginUserHandler = loginUserHandler;
+        _loginByCookieHandler = loginByCookieHandler;
     }
 
     [HttpPost("register")]
@@ -58,6 +59,22 @@ public class UserController : ControllerBase
         catch (Exception ex)
         {
             return BadRequest(ex.Message);
+        }
+    }
+    
+    [HttpPost("login-by-cookie")]
+    public async Task<IActionResult> LoginByCookieAsync([FromBody] LoginByCookieDto dto)
+    {
+        if (dto.Token == "") return BadRequest("Please provide a token!");
+
+        try
+        {
+            var userDetails = await _loginByCookieHandler.HandleAsync(new LoginByCookieQuery(dto));
+            return Ok(userDetails);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex);
         }
     }
 }

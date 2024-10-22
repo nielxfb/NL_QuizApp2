@@ -38,4 +38,32 @@ public class JwtTokenService
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
+
+    public string ValidateToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(_secret);
+        tokenHandler.ValidateToken(token, new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = _issuer,
+            ValidAudience = _audience,
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        }, out var validatedToken);
+
+        var jwtToken = (JwtSecurityToken) validatedToken;
+        
+        var userIdClaim = jwtToken.Claims.FirstOrDefault(x => x.Type.ToString() == "nameid");
+        if (userIdClaim == null)
+        {
+            throw new SecurityTokenException("Token does not contain a valid user identifier.");
+        }
+
+        var userId = userIdClaim.Value;
+
+        return userId;
+    }
 }

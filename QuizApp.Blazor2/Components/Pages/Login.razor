@@ -1,10 +1,15 @@
 @page "/Login"
-@using QuizApp.Application.DTOs.User
+@using QuizApp.Blazor2.Services
+@layout CenterLayout
 
-@inject HttpClient HttpClient
 @inject NavigationManager Nav
+@inject ICookie Cookie
+@inject ISessionStorageService Session
+@inject UserService UserService
 
-<PageTitle>Quiz App - Register</PageTitle>
+<PageTitle>Quiz App - Login</PageTitle>
+
+<Loading IsLoading="@_isLoading"/>
 
 <div class="w-auto container-fluid rounded-3 d-flex flex-column shadow-lg py-lg-5 px-lg-5 gap-4">
     <h2>Login Page</h2>
@@ -23,34 +28,48 @@
         <button class="btn btn-primary" type="submit">Register</button>
     </EditForm>
 
-    <a href="/auth/login">Already have an account? Login here.</a>
+    <a href="/Register">Not registered yet? Register here.</a>
 </div>
 
 @code {
-    private LoginUserDto Model { get; set; } = new();
+    private LoginUserDto Model { get; } = new();
     private string ErrorMessage { get; set; } = string.Empty;
+    private bool _isLoading = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var cookie = await Cookie.GetValue("user_cookie");
+            var user = await Session.GetItemAsync<UserDetailsDto>("user");
+
+            if (user != null || cookie != "")
+            {
+                Nav.NavigateTo("/");
+            }
+        }
+
+        _isLoading = false;
+        StateHasChanged();
+    }
 
     private async Task Handle()
     {
-        Console.WriteLine($"Initial: {Model.Initial}, Password: {Model.Password}");
-        try
-        {
-            var response = await HttpClient.PostAsJsonAsync("api/User/login", Model);
-            var content = await response.Content.ReadAsStringAsync();
+        _isLoading = true;
+        StateHasChanged();
 
-            if (response.IsSuccessStatusCode)
-            {
-                ErrorMessage = "Success";
-            }
-            else
-            {
-                ErrorMessage = content;
-            }
-        }
-        catch (Exception ex)
+        var response = await UserService.Login(Model);
+
+        if (response.IsSuccess)
         {
-            ErrorMessage = $"An error occurred: {ex.Message}";
+            Nav.NavigateTo(("/"));
+            return;
         }
+
+        ErrorMessage = response.Message;
+
+        _isLoading = false;
+        StateHasChanged();
     }
 
 }

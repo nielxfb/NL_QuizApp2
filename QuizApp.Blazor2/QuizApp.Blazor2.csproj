@@ -4,10 +4,15 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <EnableCssIsolation>true</EnableCssIsolation>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\QuizApp.Application\QuizApp.Application.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Blazored.SessionStorage" Version="2.4.0" />
     </ItemGroup>
 
 </Project>
