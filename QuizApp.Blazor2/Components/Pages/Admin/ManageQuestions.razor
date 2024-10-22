@@ -1,0 +1,185 @@
+@page "/ManageQuestions/{Id}"
+@layout NavbarLayout
+
+@inject QuizService QuizService
+@inject QuestionService QuestionService
+
+<Loading IsLoading="@_isLoading"/>
+
+<h3>Manage Questions for @Quiz.Title</h3>
+<p class="text-danger">@ErrorMessage</p>
+
+<div class="d-flex flex-column gap-2">
+
+    @foreach (var question in Questions)
+    {
+        <div class="border rounded-3 shadow-sm py-lg-3 px-lg-4">
+
+            <div class="d-flex justify-content-between align-items-center p-2">
+                <h5>@question.QuestionText</h5>
+                <div>
+                    <button class="btn btn-primary" @onclick="() => EditQuestion(question)" type="button">Edit Question</button>
+                    <button class="btn btn-danger" @onclick="() => DeleteQuestion(question.QuestionId.ToString())">Delete Question</button>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column gap-2 p-2">
+                @if (question.Options.Count == 0)
+                {
+                    <p class="text-danger">There are no options for this question.</p>
+                }
+
+                @foreach (var option in question.Options)
+                {
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="radio" disabled/>
+                        <p class="p-0 m-0">@option.OptionText</p>
+                    </div>
+                }
+            </div>
+
+        </div>
+    }
+
+    <button class="btn btn-primary" @onclick="AddQuestion">Add Question</button>
+</div>
+
+<AddQuestionModal Question="@NewQuestion" IsVisible="IsAddModalVisible" OnClose="OnAddModalClose" OnSave="OnAddModalSave"/>
+<UpdateQuestionModal Question="@SelectedQuestion" IsVisible="IsUpdateModalVisible" OnClose="OnUpdateModalClose" OnSave="OnUpdateModalSave"/>
+
+@code {
+    [Parameter] public string Id { get; set; } = string.Empty;
+    private QuizDetailsDto Quiz { get; set; } = new();
+    private List<QuestionDto> Questions { get; set; } = new();
+    private QuestionDto SelectedQuestion { get; set; } = new();
+    private QuestionDto NewQuestion { get; set; } = new();
+    private string ErrorMessage { get; set; } = string.Empty;
+    private bool IsUpdateModalVisible { get; set; }
+    private bool IsAddModalVisible { get; set; }
+    private bool _isLoading = true;
+
+    private void AddQuestion()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        IsAddModalVisible = true;
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private void EditQuestion(QuestionDto question)
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        SelectedQuestion = question;
+        IsUpdateModalVisible = true;
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private void OnAddModalClose()
+    {
+        NewQuestion = new();
+        IsAddModalVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task OnAddModalSave()
+    {
+        var response = await QuestionService.AddQuestion(new AddQuestionDto
+        {
+            QuestionText = NewQuestion.QuestionText,
+            ImageUrl = NewQuestion.ImageUrl,
+            QuizId = Quiz.Id,
+        });
+
+        if (!response.IsSuccess)
+        {
+            ErrorMessage = response.Message;
+        }
+
+        IsAddModalVisible = false;
+        await Refresh();
+        StateHasChanged();
+    }
+
+    private void OnUpdateModalClose()
+    {
+        SelectedQuestion = new();
+        IsUpdateModalVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task OnUpdateModalSave()
+    {
+        var response = await QuestionService.UpdateQuestion(new UpdateQuestionDto
+        {
+            QuestionId = SelectedQuestion.QuestionId,
+            QuestionText = SelectedQuestion.QuestionText,
+            ImageUrl = SelectedQuestion.ImageUrl,
+            QuizId = Quiz.Id,
+        });
+
+        if (!response.IsSuccess)
+        {
+            ErrorMessage = response.Message;
+        }
+
+        SelectedQuestion = new();
+        IsUpdateModalVisible = false;
+        await Refresh();
+        StateHasChanged();
+    }
+
+    private async Task DeleteQuestion(string questionId)
+    {
+        _isLoading = true;
+        StateHasChanged();
+        
+        var response = await QuestionService.DeleteQuestion(questionId);
+        if (!response.IsSuccess)
+        {
+            ErrorMessage = response.Message;
+        }
+
+        await Refresh();
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Refresh();
+        }
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task Refresh()
+    {
+        _isLoading = true;
+        var quizResponse = await QuizService.GetQuizById(Id);
+        if (!quizResponse.IsSuccess)
+        {
+            ErrorMessage = quizResponse.Message;
+            return;
+        }
+
+        Quiz = quizResponse.Data!;
+
+        var questionsResponse = await QuestionService.GetQuestionsInQuiz(Id);
+        if (!questionsResponse.IsSuccess)
+        {
+            ErrorMessage = questionsResponse.Message;
+            return;
+        }
+
+        Questions = questionsResponse.Data!;
+    }
+
+}

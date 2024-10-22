@@ -31,6 +31,7 @@
             <td>@quiz.Title</td>
             <td>
                 <button class="btn btn-primary" @onclick="() => EditQuiz(quiz.Id.ToString())">Edit</button>
+                <button class="btn btn-warning" @onclick="() => ManageQuestions(quiz.Id.ToString())">Manage Questions</button>
                 <button class="btn btn-danger" @onclick="() => DeleteQuiz(quiz.Id.ToString())">Delete</button>
             </td>
         </tr>
@@ -56,6 +57,11 @@
     private void EditQuiz(string id)
     {
         Nav.NavigateTo($"/UpdateQuiz/{id}");
+    }
+    
+    private void ManageQuestions(string id)
+    {
+        Nav.NavigateTo($"/ManageQuestions/{id}");
     }
 
     private async Task DeleteQuiz(string id)

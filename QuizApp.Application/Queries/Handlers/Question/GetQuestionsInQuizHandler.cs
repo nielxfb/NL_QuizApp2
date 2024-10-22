@@ -1,3 +1,4 @@
+using QuizApp.Application.DTOs.Option;
 using QuizApp.Application.DTOs.Question;
 using QuizApp.Application.Interfaces.Handlers;
 using QuizApp.Application.Queries.Question;
@@ -26,7 +27,15 @@ public class GetQuestionsInQuizHandler : IQueryHandler<GetQuestionsInQuizQuery, 
         {
             QuestionId = q.QuestionId,
             QuestionText = q.QuestionText,
-            ImageUrl = q.ImageUrl
+            ImageUrl = q.ImageUrl,
+            Options = q.Options.Select(o => new OptionDto
+            {
+                QuestionId = o.QuestionId,
+                OptionChoice = o.OptionChoice,
+                OptionText = o.OptionText,
+                IsCorrect = o.IsCorrect,
+                ImageUrl = o.ImageUrl,
+            }).ToList()
         }).ToList();
     }
 }

@@ -15,6 +15,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://
 builder.Services.AddScoped<ICookie, Cookie>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<QuizService>();
+builder.Services.AddScoped<QuestionService>();
 
 var app = builder.Build();
 
