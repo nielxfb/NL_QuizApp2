@@ -1,10 +1,9 @@
 @using QuizApp.Blazor2.Components.Pages
+@using QuizApp.Blazor2.Services
 @inherits LayoutComponentBase
 
-@inject ISessionStorageService Session
-@inject ICookie Cookie
 @inject NavigationManager Nav
-@inject HttpClient HttpClient
+@inject UserService UserService
 
 <Loading IsLoading="@_isLoading"/>
 
@@ -56,36 +55,15 @@
     {
         if (firstRender)
         {
-            var cookie = await Cookie.GetValue("user_cookie");
-            var user = await Session.GetItemAsync<UserDetailsDto>("user");
-            if (user == null && cookie == "")
+            var response = await UserService.GetUserDetails();
+
+            if (!response.IsSuccess)
             {
                 Nav.NavigateTo("/Login");
                 return;
             }
 
-            if (cookie != "")
-            {
-                var response = await HttpClient.PostAsJsonAsync("api/User/login-by-cookie", new { Token = cookie });
-                if (!response.IsSuccessStatusCode)
-                {
-                    await Cookie.SetValue("user_cookie", "");
-                    Nav.NavigateTo("/Login");
-                    return;
-                }
-
-                user = await response.Content.ReadFromJsonAsync<UserDetailsDto>();
-                await Session.SetItemAsync("user", new
-                {
-                    user!.UserId,
-                    user.Initial,
-                    user.FullName,
-                    user.Role,
-                });
-            }
-
-            _isLoading = false;
-            StateHasChanged();
+            var user = response.Data;
 
             if (user!.Role == "Admin")
             {
@@ -99,9 +77,7 @@
 
     private async Task LogOut()
     {
-        Console.WriteLine("Pencet log out");
-        await Session.RemoveItemAsync("user");
-        await Cookie.SetValue("user_cookie", "");
+        await UserService.LogOut();
         Nav.NavigateTo("/Login");
     }
 

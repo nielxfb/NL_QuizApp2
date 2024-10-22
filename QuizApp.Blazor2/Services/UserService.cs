@@ -90,4 +90,60 @@ public class UserService
             };
         }
     }
+
+    public async Task<Response<UserDetailsDto>> GetUserDetails()
+    {
+        var user = await _session.GetItemAsync<UserDetailsDto>("user");
+        var cookie = await _cookie.GetValue("user_cookie");
+
+        if (user == null && cookie == "")
+        {
+            return new Response<UserDetailsDto>
+            {
+                IsSuccess = false,
+                Message = "User not logged in.",
+            };
+        }
+
+        if (cookie == "")
+            return new Response<UserDetailsDto>
+            {
+                IsSuccess = true,
+                Message = "User logged in.",
+                Data = user,
+            };
+        
+        var response = await _httpClient.PostAsJsonAsync("api/User/login-by-cookie", new { Token = cookie });
+        if (!response.IsSuccessStatusCode)
+        {
+            await _cookie.SetValue("user_cookie", "");
+            return new Response<UserDetailsDto>
+            {
+                IsSuccess = false,
+                Message = "User not logged in",
+            };
+        }
+
+        user = await response.Content.ReadFromJsonAsync<UserDetailsDto>();
+        await _session.SetItemAsync("user", new
+        {
+            user!.UserId,
+            user.Initial,
+            user.FullName,
+            user.Role,
+        });
+
+        return new Response<UserDetailsDto>
+        {
+            IsSuccess = true,
+            Message = "User logged in.",
+            Data = user,
+        };
+    }
+
+    public async Task LogOut()
+    {
+        await _session.RemoveItemAsync("user");
+        await _cookie.SetValue("user_cookie", "");
+    }
 }
