@@ -35,6 +35,7 @@ public class QuestionRepository : IQuestionRepository
     public Task<List<Question>> GetByQuizIdAsync(Guid quizId)
     {
         return _context.Questions
+            .Include(q => q.Options)
             .Where(q => q.QuizId == quizId)
             .ToListAsync();
     }
