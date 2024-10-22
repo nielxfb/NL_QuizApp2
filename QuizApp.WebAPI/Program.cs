@@ -1,10 +1,15 @@
+using System.Collections.Generic;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using QuizApp.Application.Commands;
 using QuizApp.Application.Commands.Handlers.Option;
 using QuizApp.Application.Commands.Handlers.Question;
 using QuizApp.Application.Commands.Handlers.Quiz;

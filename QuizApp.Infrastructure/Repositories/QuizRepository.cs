@@ -36,7 +36,7 @@ public class QuizRepository : IQuizRepository
         _context.Quizzes.Update(quiz);
         return _context.SaveChangesAsync();
     }
-    
+
     public Task RemoveAsync(Quiz quiz)
     {
         _context.Quizzes.Remove(quiz);

@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using QuizApp.Application.Commands;
 using QuizApp.Application.Commands.Handlers;
@@ -9,59 +11,53 @@ using QuizApp.Application.Queries;
 using QuizApp.Application.Queries.Handlers;
 using QuizApp.Application.Queries.User;
 
-namespace QuizApp.WebAPI.Controllers
+namespace QuizApp.WebAPI.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class UserController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UserController : ControllerBase
+    private readonly ICommandHandler<RegisterUserCommand> _registerUserHandler;
+
+    private readonly IQueryHandler<LoginUserQuery, UserDetailsDto> _loginUserHandler;
+
+    public UserController(ICommandHandler<RegisterUserCommand> registerUserHandler,
+        IQueryHandler<LoginUserQuery, UserDetailsDto> loginUserHandler)
     {
-        private readonly ICommandHandler<RegisterUserCommand> _registerUserHandler;
+        _registerUserHandler = registerUserHandler;
+        _loginUserHandler = loginUserHandler;
+    }
 
-        private readonly IQueryHandler<LoginUserQuery, UserDetailsDto> _loginUserHandler;
+    [HttpPost("register")]
+    public async Task<IActionResult> RegisterUserAsync([FromBody] RegisterUserDto dto)
+    {
+        if (dto.FullName == "" || dto.Initial == "" || dto.Password == "")
+            return BadRequest("Please provide all required fields!");
 
-        public UserController(ICommandHandler<RegisterUserCommand> registerUserHandler,
-            IQueryHandler<LoginUserQuery, UserDetailsDto> loginUserHandler)
+        try
         {
-            _registerUserHandler = registerUserHandler;
-            _loginUserHandler = loginUserHandler;
+            await _registerUserHandler.HandleAsync(new RegisterUserCommand(dto));
+            return Ok("Successfully registered user!");
         }
-
-        [HttpPost("register")]
-        public async Task<IActionResult> RegisterUserAsync([FromBody] RegisterUserDto dto)
+        catch (Exception ex)
         {
-            if (dto.FullName == "" || dto.Initial == "" || dto.Password == "")
-            {
-                return BadRequest("Please provide all required fields!");
-            }
-
-            try
-            {
-                await _registerUserHandler.HandleAsync(new RegisterUserCommand(dto));
-                return Ok("Successfully registered user!");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return BadRequest(ex.Message);
         }
+    }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> LoginUserAsync([FromBody] LoginUserDto dto)
+    [HttpPost("login")]
+    public async Task<IActionResult> LoginUserAsync([FromBody] LoginUserDto dto)
+    {
+        if (dto.Initial == "" || dto.Password == "") return BadRequest("Please provide all required fields!");
+
+        try
         {
-            if (dto.Initial == "" || dto.Password == "")
-            {
-                return BadRequest("Please provide all required fields!");
-            }
-
-            try
-            {
-                var userDetails = await _loginUserHandler.HandleAsync(new LoginUserQuery(dto));
-                return Ok(userDetails);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var userDetails = await _loginUserHandler.HandleAsync(new LoginUserQuery(dto));
+            return Ok(userDetails);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
         }
     }
 }

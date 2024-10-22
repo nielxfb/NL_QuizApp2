@@ -16,11 +16,8 @@ public class RemoveQuestionHandler : ICommandHandler<RemoveQuestionCommand>
     public async Task HandleAsync(RemoveQuestionCommand command)
     {
         var question = await _repository.GetByIdAsync(command.QuestionId);
-        if (question == null)
-        {
-            throw new ArgumentException("Question not found.");
-        }
-        
+        if (question == null) throw new ArgumentException("Question not found.");
+
         await _repository.RemoveAsync(question);
     }
 }

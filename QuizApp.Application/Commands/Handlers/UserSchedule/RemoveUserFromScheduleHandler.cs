@@ -16,11 +16,8 @@ public class RemoveUserFromScheduleHandler : ICommandHandler<RemoveUserFromSched
     public async Task HandleAsync(RemoveUserFromScheduleCommand command)
     {
         var userSchedule = await _repository.GetByScheduleAndUserId(command.UserId, command.ScheduleId);
-        if (userSchedule == null)
-        {
-            throw new ArgumentException("User not found in schedule.");
-        }
-        
+        if (userSchedule == null) throw new ArgumentException("User not found in schedule.");
+
         await _repository.RemoveAsync(userSchedule);
     }
 }

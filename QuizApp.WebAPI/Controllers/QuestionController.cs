@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,106 +10,93 @@ using QuizApp.Application.Interfaces.Handlers;
 using QuizApp.Application.Queries.Handlers.Question;
 using QuizApp.Application.Queries.Question;
 
-namespace QuizApp.WebAPI.Controllers
+namespace QuizApp.WebAPI.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class QuestionController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class QuestionController : ControllerBase
+    private readonly ICommandHandler<AddQuestionCommand> _addCommandHandler;
+    private readonly ICommandHandler<RemoveQuestionCommand> _removeQuestionHandler;
+    private readonly ICommandHandler<UpdateQuestionCommand> _updateQuestionHandler;
+    private readonly IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>> _getQuestionsInQuizHandler;
+
+    public QuestionController(ICommandHandler<AddQuestionCommand> addCommandHandler,
+        ICommandHandler<RemoveQuestionCommand> removeQuestionHandler,
+        ICommandHandler<UpdateQuestionCommand> updateQuestionHandler,
+        IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>> getQuestionsInQuizHandler)
     {
-        private readonly ICommandHandler<AddQuestionCommand> _addCommandHandler;
-        private readonly ICommandHandler<RemoveQuestionCommand> _removeQuestionHandler;
-        private readonly ICommandHandler<UpdateQuestionCommand> _updateQuestionHandler;
-        private readonly IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>> _getQuestionsInQuizHandler;
+        _addCommandHandler = addCommandHandler;
+        _removeQuestionHandler = removeQuestionHandler;
+        _updateQuestionHandler = updateQuestionHandler;
+        _getQuestionsInQuizHandler = getQuestionsInQuizHandler;
+    }
 
-        public QuestionController(ICommandHandler<AddQuestionCommand> addCommandHandler,
-            ICommandHandler<RemoveQuestionCommand> removeQuestionHandler,
-            ICommandHandler<UpdateQuestionCommand> updateQuestionHandler,
-            IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>> getQuestionsInQuizHandler)
+    [HttpPost("add-question")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AddQuestion([FromBody] AddQuestionDto dto)
+    {
+        if (dto.QuizId == Guid.Empty || dto.QuestionText == "") return BadRequest("All fields are required");
+
+        try
         {
-            _addCommandHandler = addCommandHandler;
-            _removeQuestionHandler = removeQuestionHandler;
-            _updateQuestionHandler = updateQuestionHandler;
-            _getQuestionsInQuizHandler = getQuestionsInQuizHandler;
+            await _addCommandHandler.HandleAsync(new AddQuestionCommand(dto));
+            return Ok("Successfully added question!");
         }
-
-        [HttpPost("add-question")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddQuestion([FromBody] AddQuestionDto dto)
+        catch (Exception e)
         {
-            if (dto.QuizId == Guid.Empty || dto.QuestionText == "")
-            {
-                return BadRequest("All fields are required");
-            }
-            
-            try
-            {
-                await _addCommandHandler.HandleAsync(new AddQuestionCommand(dto));
-                return Ok("Successfully added question!");
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return BadRequest(e.Message);
         }
+    }
 
-        [HttpGet("get-questions-in-quiz")]
-        [Authorize]
-        public async Task<IActionResult> GetQuestionsInQuiz([FromQuery] Guid quizId)
+    [HttpGet("get-questions-in-quiz")]
+    [Authorize]
+    public async Task<IActionResult> GetQuestionsInQuiz([FromQuery] Guid quizId)
+    {
+        if (quizId == Guid.Empty) return BadRequest("Quiz Id is required");
+
+        try
         {
-            if (quizId == Guid.Empty)
-            {
-                return BadRequest("Quiz Id is required");
-            }
-
-            try
-            {
-                var questions = await _getQuestionsInQuizHandler.HandleAsync(new GetQuestionsInQuizQuery(quizId));
-                return Ok(questions);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            var questions = await _getQuestionsInQuizHandler.HandleAsync(new GetQuestionsInQuizQuery(quizId));
+            return Ok(questions);
         }
-        
-        [HttpDelete("remove-question")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> RemoveQuestion([FromQuery] Guid questionId)
+        catch (Exception e)
         {
-            if (questionId == Guid.Empty)
-            {
-                return BadRequest("Question Id is required");
-            }
-
-            try
-            {
-                await _removeQuestionHandler.HandleAsync(new RemoveQuestionCommand(questionId));
-                return Ok("Successfully removed question!");
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return BadRequest(e.Message);
         }
+    }
 
-        [HttpPut("update-question")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateQuestion([FromBody] UpdateQuestionDto dto)
+    [HttpDelete("remove-question")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> RemoveQuestion([FromQuery] Guid questionId)
+    {
+        if (questionId == Guid.Empty) return BadRequest("Question Id is required");
+
+        try
         {
-            if (dto.QuestionId == Guid.Empty || dto.QuestionText == "")
-            {
-                return BadRequest("All fields are required");
-            }
+            await _removeQuestionHandler.HandleAsync(new RemoveQuestionCommand(questionId));
+            return Ok("Successfully removed question!");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
 
-            try
-            {
-                await _updateQuestionHandler.HandleAsync(new UpdateQuestionCommand(dto));
-                return Ok("Successfully updated question!");
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+    [HttpPut("update-question")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateQuestion([FromBody] UpdateQuestionDto dto)
+    {
+        if (dto.QuestionId == Guid.Empty || dto.QuestionText == "") return BadRequest("All fields are required");
+
+        try
+        {
+            await _updateQuestionHandler.HandleAsync(new UpdateQuestionCommand(dto));
+            return Ok("Successfully updated question!");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
         }
     }
 }

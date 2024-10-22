@@ -22,7 +22,7 @@ public class AddUserToScheduleHandler : ICommandHandler<AddUserToScheduleCommand
             ScheduleId = command.ScheduleId,
             Status = "Incomplete"
         };
-        
+
         await _repository.AddAsync(userSchedule);
     }
 }

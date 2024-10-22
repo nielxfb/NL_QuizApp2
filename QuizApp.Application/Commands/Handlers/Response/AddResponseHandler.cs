@@ -23,22 +23,13 @@ public class AddResponseHandler : ICommandHandler<AddResponseCommand>
     public async Task HandleAsync(AddResponseCommand command)
     {
         var quiz = await _quizRepository.GetByIdAsync(command.QuizId);
-        if (quiz == null)
-        {
-            throw new ArgumentException("Quiz not found.");
-        }
+        if (quiz == null) throw new ArgumentException("Quiz not found.");
 
         var user = await _userRepository.GetByIdAsync(command.UserId);
-        if (user == null)
-        {
-            throw new ArgumentException("User not found.");
-        }
+        if (user == null) throw new ArgumentException("User not found.");
 
         var option = await _optionRepository.GetByIdAsync(command.QuestionId, command.OptionChoice);
-        if (option == null)
-        {
-            throw new ArgumentException("Option not found.");
-        }
+        if (option == null) throw new ArgumentException("Option not found.");
 
         var isCorrect = option.IsCorrect;
 
@@ -50,7 +41,7 @@ public class AddResponseHandler : ICommandHandler<AddResponseCommand>
             QuestionId = command.QuestionId,
             OptionChoice = command.OptionChoice,
             IsCorrect = isCorrect,
-            AnsweredAt = command.AnsweredAt,
+            AnsweredAt = command.AnsweredAt
         };
 
         await _repository.AddAsync(response);

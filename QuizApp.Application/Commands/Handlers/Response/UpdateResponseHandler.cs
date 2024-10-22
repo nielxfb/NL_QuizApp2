@@ -16,10 +16,7 @@ public class UpdateResponseHandler : ICommandHandler<UpdateResponseCommand>
     public async Task HandleAsync(UpdateResponseCommand command)
     {
         var response = await _repository.GetByIdAsync(command.ResponseId);
-        if (response == null)
-        {
-            throw new ArgumentException("Response not found.");
-        }
+        if (response == null) throw new ArgumentException("Response not found.");
 
         response.OptionChoice = command.OptionChoice;
         response.AnsweredAt = command.AnsweredAt;

@@ -18,17 +18,14 @@ public class AddQuestionHandler : ICommandHandler<AddQuestionCommand>
     public async Task HandleAsync(AddQuestionCommand command)
     {
         var quiz = await _quizRepository.GetByIdAsync(command.QuizId);
-        if (quiz == null)
-        {
-            throw new ArgumentException("Quiz not found.");
-        }
+        if (quiz == null) throw new ArgumentException("Quiz not found.");
 
         var question = new Domain.Entities.Question
         {
             QuestionId = Guid.NewGuid(),
             QuizId = command.QuizId,
             QuestionText = command.QuestionText,
-            ImageUrl = command.ImageUrl,
+            ImageUrl = command.ImageUrl
         };
 
         await _repository.AddAsync(question);

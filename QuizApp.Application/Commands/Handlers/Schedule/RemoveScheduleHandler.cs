@@ -17,11 +17,8 @@ public class RemoveScheduleHandler : ICommandHandler<RemoveScheduleCommand>
     public async Task HandleAsync(RemoveScheduleCommand command)
     {
         var schedule = await _repository.GetByIdAsync(command.Id);
-        if (schedule == null)
-        {
-            throw new ArgumentException("Schedule not found.");
-        }
-        
+        if (schedule == null) throw new ArgumentException("Schedule not found.");
+
         await _repository.RemoveAsync(schedule);
     }
 }

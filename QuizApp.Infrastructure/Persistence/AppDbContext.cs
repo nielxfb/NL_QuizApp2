@@ -12,7 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<Response> Responses { get; set; }
     public DbSet<Schedule> Schedules { get; set; }
     public DbSet<UserSchedule> UserSchedules { get; set; }
-    
+
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }

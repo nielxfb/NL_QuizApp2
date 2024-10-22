@@ -21,21 +21,17 @@ public class RegisterUserHandler : ICommandHandler<RegisterUserCommand>
     public async Task HandleAsync(RegisterUserCommand command)
     {
         if (!Regex.IsMatch(command.Initial, "^[A-Za-z]{2}[0-9][0-9]-[0-2]"))
-        {
             throw new ArgumentException("Invalid initial format.");
-        }
-        
+
         if (await _userRepository.GetByInitialAsync(command.Initial) != null)
-        {
             throw new ArgumentException("User with this initial already exists.");
-        }
-        
+
         var user = new Domain.Entities.User
         {
             UserId = Guid.NewGuid(),
             FullName = command.FullName,
             Initial = command.Initial,
-            Role = "User",
+            Role = "User"
         };
 
         user.Password = _passwordHasher.HashPassword(user, command.Password);

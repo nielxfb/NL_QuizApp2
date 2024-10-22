@@ -19,16 +19,13 @@ public class GetUserSchedulesHandler : IQueryHandler<GetUserSchedulesQuery, User
     public async Task<UserSchedulesDto> HandleAsync(GetUserSchedulesQuery query)
     {
         var user = await _userRepository.GetByIdAsync(query.UserId);
-        if (user == null)
-        {
-            throw new ArgumentException("User not found.");
-        }
+        if (user == null) throw new ArgumentException("User not found.");
 
         var userSchedules = await _repository.GetByUserIdAsync(query.UserId);
         return new UserSchedulesDto
         {
             UserId = query.UserId,
-            Schedules = userSchedules,
+            Schedules = userSchedules
         };
     }
 }

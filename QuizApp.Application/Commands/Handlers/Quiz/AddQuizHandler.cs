@@ -19,7 +19,7 @@ public class AddQuizHandler : ICommandHandler<AddQuizCommand>
         var quiz = new Domain.Entities.Quiz()
         {
             QuizId = Guid.NewGuid(),
-            Title = command.Title,
+            Title = command.Title
         };
 
         await _repository.AddAsync(quiz);

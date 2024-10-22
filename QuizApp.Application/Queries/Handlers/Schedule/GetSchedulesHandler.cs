@@ -25,7 +25,7 @@ public class GetSchedulesHandler : IQueryHandler<GetSchedulesQuery, List<Schedul
             Id = schedule.ScheduleId,
             Quiz = schedule.Quiz,
             StartDate = schedule.StartDate,
-            EndDate = schedule.EndDate,
+            EndDate = schedule.EndDate
         }).ToList();
     }
 }

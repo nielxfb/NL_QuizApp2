@@ -6,7 +6,7 @@ public class RemoveOptionCommand
 {
     public Guid QuestionId { get; set; }
     public char OptionChoice { get; set; }
-    
+
     public RemoveOptionCommand(RemoveOptionDto dto)
     {
         QuestionId = dto.QuestionId;

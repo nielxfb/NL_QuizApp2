@@ -8,7 +8,7 @@ namespace QuizApp.Application.Commands.Handlers.Quiz;
 public class RemoveQuizHandler : ICommandHandler<RemoveQuizCommand>
 {
     private readonly IQuizRepository _repository;
-    
+
     public RemoveQuizHandler(IQuizRepository repository)
     {
         _repository = repository;
@@ -18,11 +18,8 @@ public class RemoveQuizHandler : ICommandHandler<RemoveQuizCommand>
     public async Task HandleAsync(RemoveQuizCommand command)
     {
         var quiz = await _repository.GetByIdAsync(command.Id);
-        if (quiz == null)
-        {
-            throw new ArgumentException("Quiz not found.");
-        }
-        
+        if (quiz == null) throw new ArgumentException("Quiz not found.");
+
         await _repository.RemoveAsync(quiz);
     }
 }

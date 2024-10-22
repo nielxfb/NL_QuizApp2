@@ -20,11 +20,8 @@ public class GetByQuestionIdHandler : IQueryHandler<GetByQuestionIdQuery, List<O
     public async Task<List<OptionDto>> HandleAsync(GetByQuestionIdQuery query)
     {
         var question = await _questionRepository.GetByIdAsync(query.QuestionId);
-        if (question == null)
-        {
-            throw new ArgumentException("Question not found.");
-        }
-        
+        if (question == null) throw new ArgumentException("Question not found.");
+
         var options = await _repository.GetByQuestionIdAsync(query.QuestionId);
         return options.Select(o => new OptionDto
         {

@@ -17,10 +17,7 @@ public class UpdateQuizHandler : ICommandHandler<UpdateQuizCommand>
     public async Task HandleAsync(UpdateQuizCommand command)
     {
         var quiz = await _repository.GetByIdAsync(command.Id);
-        if (quiz == null)
-        {
-            throw new ArgumentException("Quiz not found.");
-        }
+        if (quiz == null) throw new ArgumentException("Quiz not found.");
 
         quiz.Title = command.Title;
         await _repository.UpdateAsync(quiz);

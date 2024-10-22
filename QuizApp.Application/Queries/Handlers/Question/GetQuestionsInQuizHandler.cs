@@ -19,17 +19,14 @@ public class GetQuestionsInQuizHandler : IQueryHandler<GetQuestionsInQuizQuery, 
     public async Task<List<QuestionDto>> HandleAsync(GetQuestionsInQuizQuery query)
     {
         var quiz = await _quizRepository.GetByIdAsync(query.QuizId);
-        if (quiz == null)
-        {
-            throw new ArgumentException("Quiz not found.");
-        }
+        if (quiz == null) throw new ArgumentException("Quiz not found.");
 
         var questions = await _repository.GetByQuizIdAsync(query.QuizId);
         return questions.Select(q => new QuestionDto
         {
             QuestionId = q.QuestionId,
             QuestionText = q.QuestionText,
-            ImageUrl = q.ImageUrl,
+            ImageUrl = q.ImageUrl
         }).ToList();
     }
 }

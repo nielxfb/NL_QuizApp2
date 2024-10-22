@@ -1,0 +1,56 @@
+@page "/Login"
+@using QuizApp.Application.DTOs.User
+
+@inject HttpClient HttpClient
+@inject NavigationManager Nav
+
+<PageTitle>Quiz App - Register</PageTitle>
+
+<div class="w-auto container-fluid rounded-3 d-flex flex-column shadow-lg py-lg-5 px-lg-5 gap-4">
+    <h2>Login Page</h2>
+
+    <EditForm Model="@Model" OnSubmit="Handle" class="d-flex flex-column gap-2" FormName="LoginForm">
+        <div class="form-group">
+            <label class="form-label">Initial</label>
+            <InputText @bind-Value="Model.Initial" placeholder="Enter initial" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Password</label>
+            <InputText @bind-Value="Model.Password" type="password" placeholder="Enter password" class="form-control"/>
+        </div>
+
+        <p class="text text-danger">@ErrorMessage</p>
+        <button class="btn btn-primary" type="submit">Register</button>
+    </EditForm>
+
+    <a href="/auth/login">Already have an account? Login here.</a>
+</div>
+
+@code {
+    private LoginUserDto Model { get; set; } = new();
+    private string ErrorMessage { get; set; } = string.Empty;
+
+    private async Task Handle()
+    {
+        Console.WriteLine($"Initial: {Model.Initial}, Password: {Model.Password}");
+        try
+        {
+            var response = await HttpClient.PostAsJsonAsync("api/User/login", Model);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                ErrorMessage = "Success";
+            }
+            else
+            {
+                ErrorMessage = content;
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"An error occurred: {ex.Message}";
+        }
+    }
+
+}

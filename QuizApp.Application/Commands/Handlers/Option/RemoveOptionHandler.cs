@@ -16,11 +16,8 @@ public class RemoveOptionHandler : ICommandHandler<RemoveOptionCommand>
     public async Task HandleAsync(RemoveOptionCommand command)
     {
         var option = await _repository.GetByIdAsync(command.QuestionId, command.OptionChoice);
-        if (option == null)
-        {
-            throw new ArgumentException("Option not found.");
-        }
-        
+        if (option == null) throw new ArgumentException("Option not found.");
+
         await _repository.RemoveAsync(option);
     }
 }
