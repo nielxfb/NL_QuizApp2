@@ -74,7 +74,7 @@ public class AppDbContext : DbContext
             .HasMany(e => e.Responses)
             .WithOne(e => e.Option)
             .HasForeignKey(e => new { e.QuestionId, e.OptionChoice })
-            .OnDelete(DeleteBehavior.NoAction)
+            .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
 
         base.OnModelCreating(modelBuilder);

@@ -45,7 +45,7 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasKey("QuestionId", "OptionChoice");
 
-                    b.ToTable("Options");
+                    b.ToTable("Options", (string)null);
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Question", b =>
@@ -72,7 +72,7 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasIndex("QuizId");
 
-                    b.ToTable("Questions");
+                    b.ToTable("Questions", (string)null);
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Quiz", b =>
@@ -89,7 +89,7 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasKey("QuizId");
 
-                    b.ToTable("Quizzes");
+                    b.ToTable("Quizzes", (string)null);
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Response", b =>
@@ -132,7 +132,7 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasIndex("QuestionId", "OptionChoice");
 
-                    b.ToTable("Responses");
+                    b.ToTable("Responses", (string)null);
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Schedule", b =>
@@ -156,7 +156,7 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasIndex("QuizId");
 
-                    b.ToTable("Schedules");
+                    b.ToTable("Schedules", (string)null);
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.User", b =>
@@ -188,7 +188,7 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.UserSchedule", b =>
@@ -210,7 +210,7 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasIndex("ScheduleId");
 
-                    b.ToTable("UserSchedules");
+                    b.ToTable("UserSchedules", (string)null);
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Option", b =>
@@ -258,7 +258,7 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasOne("QuizApp.Domain.Entities.Option", "Option")
                         .WithMany("Responses")
                         .HasForeignKey("QuestionId", "OptionChoice")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Option");
