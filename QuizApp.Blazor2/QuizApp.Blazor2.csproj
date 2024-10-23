@@ -14,7 +14,7 @@
     <ItemGroup>
       <PackageReference Include="Blazored.SessionStorage" Version="2.4.0" />
       <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.10" />
-      <PackageReference Include="RabbitMQ.Client" Version="7.0.0-alpha.6" />
+      <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
     </ItemGroup>
 
 </Project>

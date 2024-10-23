@@ -2,6 +2,9 @@ using Blazored.SessionStorage;
 using QuizApp.Blazor2.Components;
 using QuizApp.Blazor2.Services;
 using QuizApp.Blazor2.Utils;
+using QuizApp.Domain.Interfaces;
+using QuizApp.Infrastructure.Configurations;
+using QuizApp.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +22,9 @@ builder.Services.AddScoped<QuestionService>();
 builder.Services.AddScoped<OptionService>();
 builder.Services.AddScoped<ScheduleService>();
 builder.Services.AddScoped<UserScheduleService>();
+
+builder.Services.Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMQ"));
+builder.Services.AddScoped(typeof(IRabbitMqPublisher<>), typeof(RabbitMqPublisher<>));
 
 var app = builder.Build();
 

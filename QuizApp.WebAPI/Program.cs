@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Configuration;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -44,8 +45,10 @@ using QuizApp.Application.Queries.UserSchedule;
 using QuizApp.Application.Services;
 using QuizApp.Domain.Entities;
 using QuizApp.Domain.Interfaces;
+using QuizApp.Infrastructure.Configurations;
 using QuizApp.Infrastructure.Persistence;
 using QuizApp.Infrastructure.Repositories;
+using QuizApp.Infrastructure.Services;
 using QuizApp.Infrastructure.SignalR;
 
 var options = new WebApplicationOptions

@@ -1,10 +1,14 @@
 @page "/TakeQuiz/{Id}"
+@using QuizApp.Application.DTOs.Response
+@using QuizApp.Domain.Interfaces
 @layout NavbarLayout
 
 @inject HttpClient HttpClient
 @inject ScheduleService ScheduleService
 @inject QuizService QuizService
 @inject QuestionService QuestionService
+@inject UserService UserService
+@inject IRabbitMqPublisher<AddResponseDto> Publisher
 
 <PageTitle>Quiz App</PageTitle>
 
@@ -35,21 +39,23 @@
                     <p class="text-danger">There are no options for this question.</p>
                 }
 
-                @foreach (var option in question.Options)
-                {
-                    <div class="d-flex align-items-center gap-2">
-                        <input type="radio"/>
-                        <div class="p-0 m-0 d-flex align-items-center gap-2">
-                            <div class="p-0 m-0 d-flex align-items-center">
-                                <p class="fw-bold m-0">
-                                    @(option.OptionChoice)
-                                </p>
-                                .
+                <InputRadioGroup @bind-Value="SelectedOption" @onchange="async () => await OnOptionSelected(question.QuestionId)">
+                    @foreach (var option in question.Options)
+                    {
+                        <div class="d-flex align-items-center gap-2">
+                            <InputRadio Value="option.OptionChoice"/>
+                            <div class="p-0 m-0 d-flex align-items-center gap-2">
+                                <div class="p-0 m-0 d-flex align-items-center">
+                                    <p class="fw-bold m-0">
+                                        @(option.OptionChoice)
+                                    </p>
+                                    .
+                                </div>
+                                <p class="p-0 m-0 me-2">@option.OptionText</p>
                             </div>
-                            <p class="p-0 m-0 me-2">@option.OptionText</p>
                         </div>
-                    </div>
-                }
+                    }
+                </InputRadioGroup>
 
             </div>
 
@@ -70,6 +76,29 @@
     private string ErrorMessage { get; set; } = string.Empty;
     private ScheduleDetailsDto Schedule { get; set; } = new();
     private List<QuestionDto> Questions { get; set; } = new();
+    private OptionDto SelectedOption { get; set; } = new();
+
+    private async Task OnOptionSelected(Guid questionId)
+    {
+        var quizId = Schedule.Quiz.Id;
+        var user = await UserService.GetUserDetails();
+        if (!user.IsSuccess)
+        {
+            ErrorMessage = user.Message;
+            return;
+        }
+
+        var userId = user.Data!.UserId;
+        var dto = new AddResponseDto
+        {
+            QuestionId = questionId,
+            OptionChoice = SelectedOption.OptionChoice.ToString(),
+            UserId = userId,
+            QuizId = quizId
+        };
+
+        await Publisher.PublishMessageAsync(dto, "responses-queue");
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -108,7 +137,7 @@
             }
 
             Questions = questionResponse.Data!;
-            
+
             StateHasChanged();
             _isLoading = false;
         }
