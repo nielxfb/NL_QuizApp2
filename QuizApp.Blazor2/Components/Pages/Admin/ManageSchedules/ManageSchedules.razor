@@ -1,0 +1,181 @@
+@page "/ManageSchedules"
+@using QuizApp.Application.DTOs.Schedule
+@layout NavbarLayout
+
+@inject UserService UserService
+@inject ScheduleService ScheduleService
+@inject NavigationManager Nav
+
+<h3>Manage Schedules</h3>
+<p class="@(IsSuccess ? "text-success" : "text-danger")">@Message</p>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th scope="col">No.</th>
+        <th scope="col">Quiz Title</th>
+        <th scope="col">Start Date</th>
+        <th scope="col">End Date</th>
+        <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (Schedules == null)
+    {
+        <p class="text-danger">There are no schedules.</p>
+    }
+    else
+    {
+        @foreach (var schedule in Schedules)
+        {
+            <tr>
+                <th scope="row">@(Schedules.IndexOf(schedule) + 1)</th>
+                <td>@schedule.Quiz.Title</td>
+                <td>@schedule.StartDate.ToLocalTime()</td>
+                <td>@schedule.EndDate.ToLocalTime()</td>
+                <td>
+                    <button class="btn btn-primary">Manage Participants</button>
+                    <button class="btn btn-secondary" @onclick="() => UpdateSchedule(schedule)">Update Schedule</button>
+                    <button class="btn btn-danger" @onclick="() => DeleteSchedule(schedule)">Delete Schedule</button>
+                </td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
+
+<button class="btn btn-primary" @onclick="AddSchedule">Add New Schedule</button>
+
+<AddScheduleModal Dto="@NewSchedule" OnClose="OnAddClose" OnSave="OnAddSave" IsVisible="_isAddModalVisible"/>
+<UpdateScheduleModal Dto="@SelectedSchedule" OnClose="OnUpdateClose" OnSave="OnUpdateSave" IsVisible="_isUpdateModalVisible" />
+<Loading IsLoading="@_isLoading"/>
+
+@code {
+
+    private List<ScheduleDetailsDto> Schedules { get; set; } = new();
+    private string Message { get; set; } = string.Empty;
+    private bool IsSuccess { get; set; } = true;
+    private bool _isLoading = true;
+    private AddScheduleDto NewSchedule { get; set; } = new();
+    private UpdateScheduleDto SelectedSchedule { get; set; } = new();
+    private bool _isAddModalVisible;
+    private bool _isUpdateModalVisible;
+
+    private void AddSchedule()
+    {
+        Message = "";
+        _isAddModalVisible = true;
+        _isLoading = false;
+    }
+
+    private void UpdateSchedule(ScheduleDetailsDto dto)
+    {
+        SelectedSchedule = new UpdateScheduleDto
+        {
+            Id = dto.Id,
+            QuizId = dto.Quiz.QuizId,
+            StartDate = dto.StartDate,
+            EndDate = dto.EndDate
+        };
+        
+        Message = "";
+        _isUpdateModalVisible = true;
+        _isLoading = false;
+    }
+
+    private async Task DeleteSchedule(ScheduleDetailsDto dto)
+    {
+        _isLoading = true;
+        StateHasChanged();
+        
+        var response = await ScheduleService.RemoveSchedule(dto.Id);
+        IsSuccess = response.IsSuccess;
+        Message = response.Message;
+        await Refresh();
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private void OnAddClose()
+    {
+        _isAddModalVisible = false;
+        StateHasChanged();
+        NewSchedule = new();
+    }
+
+    private async Task OnAddSave()
+    {
+        _isLoading = true;
+        _isAddModalVisible = false;
+        StateHasChanged();
+
+        var response = await ScheduleService.AddSchedule(NewSchedule);
+        IsSuccess = response.IsSuccess;
+        Message = response.Message;
+        await Refresh();
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private void OnUpdateClose()
+    {
+        _isUpdateModalVisible = false;
+        StateHasChanged();
+        SelectedSchedule = new();
+    }
+
+    private async Task OnUpdateSave()
+    {
+        _isLoading = true;
+        _isUpdateModalVisible = false;
+        StateHasChanged();
+        
+        var response = await ScheduleService.UpdateSchedule(SelectedSchedule);
+        IsSuccess = response.IsSuccess;
+        Message = response.Message;
+        await Refresh();
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        _isLoading = true;
+
+        if (firstRender)
+        {
+            var userResponse = await UserService.GetUserDetails();
+
+            if (!userResponse.IsSuccess)
+            {
+                Nav.NavigateTo("/Login");
+                return;
+            }
+
+            var user = userResponse.Data!;
+
+            if (user.Role != "Admin")
+            {
+                Nav.NavigateTo("/");
+            }
+
+            await Refresh();
+        }
+    }
+
+    private async Task Refresh()
+    {
+        var response = await ScheduleService.GetSchedules();
+        if (!response.IsSuccess)
+        {
+            Message = response.Message;
+            StateHasChanged();
+            return;
+        }
+
+        Schedules = response.Data!;
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+}

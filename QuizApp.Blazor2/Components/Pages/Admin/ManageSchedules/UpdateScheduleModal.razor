@@ -1,0 +1,102 @@
+@using QuizApp.Application.DTOs.Schedule
+@inject QuizService QuizService
+
+@if (IsVisible)
+{
+    <EditForm class="modal fade show d-block" style="display:block;" tabindex="-1" role="dialog" Model="@Dto">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Schedule</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body d-flex flex-column gap-2">
+                    <div class="form-group">
+                        <label class="form-label">Quiz</label>
+                        <InputSelect class="form-select" @bind-Value="@Dto.QuizId">
+                            <option value="">Select Quiz</option>
+                            @foreach (var quiz in Quizzes)
+                            {
+                                <option value="@quiz.Id">@quiz.Title</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Start Date</label>
+                        <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="LocalStartDate" class="form-control"/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">End Date</label>
+                        <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="LocalEndDate" class="form-control"/>
+                    </div>
+                </div>
+                <p class="text-danger">@ErrorMessage</p>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveChanges">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+    <div class="modal-backdrop fade show"></div>
+}
+
+<Loading IsLoading="_isLoading" />
+
+@code {
+    [Parameter] public UpdateScheduleDto Dto { get; set; } = new();
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public bool IsVisible { get; set; }
+    private bool _isLoading;
+    private List<QuizDetailsDto> Quizzes { get; set; } = new();
+    private string ErrorMessage { get; set; } = string.Empty;
+    
+    private DateTime LocalStartDate
+    {
+        get => Dto.StartDate.ToLocalTime();
+        set => Dto.StartDate = DateTime.SpecifyKind(value, DateTimeKind.Local).ToUniversalTime();  // Convert back to UTC
+    }
+
+    private DateTime LocalEndDate
+    {
+        get => Dto.EndDate.ToLocalTime();
+        set => Dto.EndDate = DateTime.SpecifyKind(value, DateTimeKind.Local).ToUniversalTime();  // Convert back to UTC
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            var quizResponse = await QuizService.GetQuizzes();
+            if (!quizResponse.IsSuccess)
+            {
+                ErrorMessage = quizResponse.Message;
+                _isLoading = false;
+                StateHasChanged();
+                return;
+            }
+
+            Quizzes = quizResponse.Data!;
+            
+        }
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private void Close()
+    {
+        OnClose.InvokeAsync();
+    }
+    
+    private void SaveChanges()
+    {
+        OnSave.InvokeAsync();
+    }
+
+}

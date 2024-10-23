@@ -80,6 +80,10 @@ public class ScheduleService
 
         try
         {
+            var startDate = dto.StartDate.ToUniversalTime();
+            var endDate = dto.EndDate.ToUniversalTime();
+            dto.StartDate = startDate;
+            dto.EndDate = endDate;
             var response = await _httpClient.PostAsJsonAsync("api/Schedule/add-schedule", dto);
             var message = await response.Content.ReadAsStringAsync();
             return new Response<AddScheduleDto>
@@ -91,6 +95,76 @@ public class ScheduleService
         catch (Exception e)
         {
             return new Response<AddScheduleDto>
+            {
+                IsSuccess = false,
+                Message = e.Message,
+            };
+        }
+    }
+
+    public async Task<Response<UpdateScheduleDto>> UpdateSchedule(UpdateScheduleDto dto)
+    {
+        var cookie = await _cookie.GetValue("user_cookie");
+
+        if (cookie == "")
+        {
+            return new Response<UpdateScheduleDto>
+            {
+                IsSuccess = false,
+                Message = "You are not authorized to perform this action",
+            };
+        }
+
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cookie);
+
+        try
+        {
+            var response = await _httpClient.PutAsJsonAsync("api/Schedule/update-schedule", dto);
+            var message = await response.Content.ReadAsStringAsync();
+            return new Response<UpdateScheduleDto>
+            {
+                IsSuccess = response.IsSuccessStatusCode,
+                Message = message,
+            };
+        }
+        catch (Exception e)
+        {
+            return new Response<UpdateScheduleDto>
+            {
+                IsSuccess = false,
+                Message = e.Message,
+            };
+        }
+    }
+
+    public async Task<Response<string>> RemoveSchedule(Guid scheduleId)
+    {
+        var cookie = await _cookie.GetValue("user_cookie");
+
+        if (cookie == "")
+        {
+            return new Response<string>
+            {
+                IsSuccess = false,
+                Message = "You are not authorized to perform this action",
+            };
+        }
+
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cookie);
+
+        try
+        {
+            var response = await _httpClient.DeleteAsync($"api/Schedule/remove-schedule?id={scheduleId}");
+            var message = await response.Content.ReadAsStringAsync();
+            return new Response<string>
+            {
+                IsSuccess = response.IsSuccessStatusCode,
+                Message = message,
+            };
+        }
+        catch (Exception e)
+        {
+            return new Response<string>
             {
                 IsSuccess = false,
                 Message = e.Message,
