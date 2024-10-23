@@ -16,7 +16,7 @@
                         <InputFile class="form-control" OnChange="HandleSelected"/>
                     </div>
                 </div>
-                <p class="@(IsSuccess ? "text-primary" : "text-danger")">@Message</p>
+                <p class="@(IsSuccess ? "text-success" : "text-danger")">@Message</p>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
                     <button type="button" class="btn btn-primary" @onclick="UploadImage" disabled="@_isUploadDisabled">Upload Image</button>
