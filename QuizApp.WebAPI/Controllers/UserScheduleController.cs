@@ -69,7 +69,7 @@ public class UserScheduleController : ControllerBase
         try
         {
             await _addUserToScheduleHandler.HandleAsync(new AddUserToScheduleCommand(dto));
-            return Ok();
+            return Ok("Successfully added user to schedule.");
         }
         catch (Exception ex)
         {
@@ -79,14 +79,14 @@ public class UserScheduleController : ControllerBase
 
     [HttpDelete("remove-user-from-schedule")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> RemoveUserFromSchedule([FromBody] RemoveUserFromScheduleDto dto)
+    public async Task<IActionResult> RemoveUserFromSchedule([FromQuery] RemoveUserFromScheduleDto dto)
     {
         if (dto.UserId == Guid.Empty || dto.ScheduleId == Guid.Empty) return BadRequest("Invalid user or schedule id.");
 
         try
         {
             await _removeUserFromScheduleHandler.HandleAsync(new RemoveUserFromScheduleCommand(dto));
-            return Ok();
+            return Ok("Successfully removed user from schedule.");
         }
         catch (Exception ex)
         {

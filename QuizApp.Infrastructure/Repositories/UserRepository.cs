@@ -27,6 +27,11 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<List<User>> GetAllUsers()
+    {
+        return await _context.Users.ToListAsync();
+    }
+
     public async Task AddAsync(User user)
     {
         await _context.Users.AddAsync(user);

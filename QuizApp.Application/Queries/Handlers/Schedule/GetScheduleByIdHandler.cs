@@ -29,7 +29,11 @@ public class GetScheduleByIdHandler : IQueryHandler<GetScheduleByIdQuery, Schedu
         return new ScheduleDetailsDto
         {
             Id = schedule.ScheduleId,
-            Quiz = quiz,
+            Quiz = new QuizDetailsDto
+            {
+                Id = quiz.QuizId,
+                Title = quiz.Title,
+            },
             StartDate = schedule.StartDate,
             EndDate = schedule.EndDate
         };

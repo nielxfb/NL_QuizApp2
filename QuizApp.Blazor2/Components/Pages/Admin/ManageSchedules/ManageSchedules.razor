@@ -34,7 +34,7 @@
                 <td>@schedule.StartDate.ToLocalTime()</td>
                 <td>@schedule.EndDate.ToLocalTime()</td>
                 <td>
-                    <button class="btn btn-primary">Manage Participants</button>
+                    <button class="btn btn-primary" @onclick="() => ManageParticipants(schedule.Id.ToString())">Manage Participants</button>
                     <button class="btn btn-secondary" @onclick="() => UpdateSchedule(schedule)">Update Schedule</button>
                     <button class="btn btn-danger" @onclick="() => DeleteSchedule(schedule)">Delete Schedule</button>
                 </td>
@@ -61,6 +61,11 @@
     private bool _isAddModalVisible;
     private bool _isUpdateModalVisible;
 
+    private void ManageParticipants(string scheduleId)
+    {
+        Nav.NavigateTo("/ManageParticipants/" + scheduleId);
+    }
+
     private void AddSchedule()
     {
         Message = "";
@@ -73,7 +78,7 @@
         SelectedSchedule = new UpdateScheduleDto
         {
             Id = dto.Id,
-            QuizId = dto.Quiz.QuizId,
+            QuizId = dto.Quiz.Id,
             StartDate = dto.StartDate,
             EndDate = dto.EndDate
         };
@@ -99,6 +104,7 @@
     private void OnAddClose()
     {
         _isAddModalVisible = false;
+        _isLoading = false;
         StateHasChanged();
         NewSchedule = new();
     }
@@ -120,6 +126,7 @@
     private void OnUpdateClose()
     {
         _isUpdateModalVisible = false;
+        _isLoading = false;
         StateHasChanged();
         SelectedSchedule = new();
     }

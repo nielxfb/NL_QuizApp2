@@ -1,5 +1,5 @@
+using System.Net.Http.Headers;
 using Blazored.SessionStorage;
-using Microsoft.AspNetCore.Components;
 using QuizApp.Application.DTOs.User;
 using QuizApp.Blazor2.Modules;
 using QuizApp.Blazor2.Utils;
@@ -129,6 +129,10 @@ public class UserService
                 user.Role,
             });
         }
+        else
+        {
+            await _session.RemoveItemAsync("user");
+        }
 
         if (user != null)
             return new Response<UserDetailsDto>
@@ -137,12 +141,57 @@ public class UserService
                 Message = "User logged in.",
                 Data = user,
             };
-        
+
         return new Response<UserDetailsDto>
         {
             IsSuccess = false,
             Message = "User not logged in.",
         };
+    }
+
+    public async Task<Response<List<UserDetailsDto>>> GetUsers()
+    {
+        var cookie = await _cookie.GetValue("user_cookie");
+
+        if (cookie == "")
+        {
+            return new Response<List<UserDetailsDto>>
+            {
+                IsSuccess = false,
+                Message = "You are not authorized to perform this action",
+            };
+        }
+
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cookie);
+
+        try
+        {
+            var response = await _httpClient.GetAsync("api/User/get-users");
+            if (!response.IsSuccessStatusCode)
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                return new Response<List<UserDetailsDto>>
+                {
+                    IsSuccess = false,
+                    Message = message,
+                };
+            }
+
+            var content = await response.Content.ReadFromJsonAsync<List<UserDetailsDto>>();
+            return new Response<List<UserDetailsDto>>
+            {
+                IsSuccess = true,
+                Data = content,
+            };
+        }
+        catch (Exception e)
+        {
+            return new Response<List<UserDetailsDto>>()
+            {
+                IsSuccess = false,
+                Message = e.Message,
+            };
+        }
     }
 
     public async Task LogOut()

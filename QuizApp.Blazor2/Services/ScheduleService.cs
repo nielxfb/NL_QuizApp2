@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using QuizApp.Application.DTOs.Schedule;
+using QuizApp.Application.DTOs.UserSchedule;
 using QuizApp.Blazor2.Modules;
 using QuizApp.Blazor2.Utils;
 
@@ -171,4 +172,60 @@ public class ScheduleService
             };
         }
     }
+
+    public async Task<Response<ScheduleDetailsDto>> GetScheduleById(string scheduleId)
+    {
+        var cookie = await _cookie.GetValue("user_cookie");
+
+        if (cookie == "")
+        {
+            return new Response<ScheduleDetailsDto>
+            {
+                IsSuccess = false,
+                Message = "You are not authorized to perform this action",
+            };
+        }
+
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cookie);
+        
+        if (!Guid.TryParse(scheduleId, out _))
+        {
+            return new Response<ScheduleDetailsDto>
+            {
+                IsSuccess = false,
+                Message = "Invalid schedule id.",
+            };
+        }
+
+        try
+        {
+            var response = await _httpClient.GetAsync("api/Schedule/get-schedule-by-id?id=" + scheduleId);
+            if (!response.IsSuccessStatusCode)
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                return new Response<ScheduleDetailsDto>
+                {
+                    IsSuccess = response.IsSuccessStatusCode,
+                    Message = message,
+                };
+            }
+
+            var schedule = await response.Content.ReadFromJsonAsync<ScheduleDetailsDto>();
+            return new Response<ScheduleDetailsDto>
+            {
+                IsSuccess = true,
+                Message = "Successfully retrieved schedule.",
+                Data = schedule,
+            };
+        }
+        catch (Exception e)
+        {
+            return new Response<ScheduleDetailsDto>
+            {
+                IsSuccess = false,
+                Message = e.Message,
+            };
+        }
+    }
+
 }

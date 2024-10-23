@@ -1,4 +1,4 @@
-@inject QuizService QuizService
+@inject UserService UserService
 
 @if (IsVisible)
 {
@@ -6,27 +6,19 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Schedule</h5>
+                    <h5 class="modal-title">Add User To Schedule</h5>
                     <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
                 </div>
                 <div class="modal-body d-flex flex-column gap-2">
                     <div class="form-group">
-                        <label class="form-label">Quiz</label>
-                        <InputSelect class="form-select" @bind-Value="@Dto.QuizId">
-                            <option value="">Select Quiz</option>
-                            @foreach (var quiz in Quizzes)
+                        <label class="form-label">Select Initial to Add</label>
+                        <InputSelect class="form-select" @bind-Value="@Dto.UserId">
+                            <option value="">Select Initial</option>
+                            @foreach (var user in Users)
                             {
-                                <option value="@quiz.Id">@quiz.Title</option>
+                                <option value="@user.UserId">@user.Initial</option>
                             }
                         </InputSelect>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Start Date</label>
-                        <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="@Dto.StartDate" class="form-control"/>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">End Date</label>
-                        <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="@Dto.EndDate" class="form-control"/>
                     </div>
                 </div>
                 <p class="text-danger">@ErrorMessage</p>
@@ -40,15 +32,15 @@
     <div class="modal-backdrop fade show"></div>
 }
 
-<Loading IsLoading="_isLoading" />
+<Loading IsLoading="_isLoading"/>
 
 @code {
-    [Parameter] public AddScheduleDto Dto { get; set; } = new();
+    [Parameter] public UserDetailsDto Dto { get; set; } = new();
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback OnSave { get; set; }
     [Parameter] public bool IsVisible { get; set; }
+    private List<UserDetailsDto> Users { get; set; } = new();
     private bool _isLoading = false;
-    private List<QuizDetailsDto> Quizzes { get; set; } = new();
     private string ErrorMessage { get; set; } = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -58,28 +50,29 @@
             _isLoading = true;
             StateHasChanged();
 
-            var quizResponse = await QuizService.GetQuizzes();
-            if (!quizResponse.IsSuccess)
+            var response = await UserService.GetUsers();
+            if (!response.IsSuccess)
             {
-                ErrorMessage = quizResponse.Message;
+                ErrorMessage = response.Message;
                 _isLoading = false;
                 StateHasChanged();
                 return;
             }
 
-            Quizzes = quizResponse.Data!;
-            
-        }
+            Users = response.Data!;
 
-        _isLoading = false;
-        StateHasChanged();
+            _isLoading = false;
+            StateHasChanged();
+        }
+        
+        Console.WriteLine(Users.Count);
     }
 
     private void Close()
     {
         OnClose.InvokeAsync();
     }
-    
+
     private void SaveChanges()
     {
         OnSave.InvokeAsync();

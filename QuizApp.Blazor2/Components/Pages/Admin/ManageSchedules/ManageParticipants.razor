@@ -1,0 +1,154 @@
+@page "/ManageParticipants/{Id}"
+@layout NavbarLayout
+
+@inject ScheduleService ScheduleService
+@inject UserScheduleService UserScheduleService
+
+
+<h3 class="mb-2">Manage Participants</h3>
+
+<p class="@(IsSuccess ? "text-success" : "text-danger") mb-2">@Message</p>
+
+<div class="d-flex justify-content-center align-items-start gap-4">
+
+    <div class="d-flex flex-column gap-4 w-25">
+        <EditForm Model="@Schedule" class="d-flex flex-column gap-2 w-100">
+            <div class="form-group d-flex flex-column gap-2">
+                <label class="form-label">Quiz Title</label>
+                <InputText @bind-Value="@Schedule.Quiz.Title" disabled="true" class="form-control"/>
+            </div>
+            <div class="form-group d-flex flex-column gap-2">
+                <label class="form-label">Start Date</label>
+                <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="@Schedule.StartDate" disabled="true" class="form-control"/>
+            </div>
+            <div class="form-group d-flex flex-column gap-2">
+                <label class="form-label">End Date</label>
+                <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="@Schedule.EndDate" disabled="true" class="form-control"/>
+            </div>
+        </EditForm>
+        <div class="w-100">
+            <button class="btn btn-primary" @onclick="AddParticipant">Add Participant</button>
+        </div>
+    </div>
+    <div class="d-flex flex-column gap-2 w-100 align-items-center justify-content-center">
+
+        <div class="d-flex flex-row-reverse flex-wrap gap-4 w-100">
+            @foreach (var user in UsersInSchedule.Users)
+            {
+                <div class="card" style="width: 18rem;">
+                    <div class="card-header fw-bold">Seat No. @(UsersInSchedule.Users.IndexOf(user) + 1)</div>
+                    <div class="card-body">
+                        <h5 class="card-title">@user.Initial</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">@user.FullName</h6>
+                    </div>
+                    <div class="card-footer d-flex flex-row-reverse">
+                        <button class="btn btn-danger" @onclick="() => RemoveParticipant(Schedule.Id, user.UserId)">Remove</button>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+<AddUserToScheduleModal Dto="@SelectedUser" OnClose="OnModalClose" OnSave="OnModalSave" IsVisible="_isModalVisible"/>
+<Loading IsLoading="_isLoading"/>
+
+@code {
+
+    [Parameter] public string Id { get; set; } = string.Empty;
+    private ScheduleDetailsDto Schedule { get; set; } = new();
+    private UsersInScheduleDto UsersInSchedule { get; set; } = new();
+    private UserDetailsDto SelectedUser { get; set; } = new();
+    private bool IsSuccess { get; set; } = true;
+    private string Message { get; set; } = string.Empty;
+    private bool _isLoading = true;
+    private bool _isModalVisible;
+
+    private void AddParticipant()
+    {
+        _isModalVisible = true;
+        SelectedUser = new();
+    }
+
+    private async Task RemoveParticipant(Guid scheduleId, Guid userId)
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        var response = await UserScheduleService.RemoveUserFromSchedule(new RemoveUserFromScheduleDto { ScheduleId = scheduleId, UserId = userId });
+        Message = response.Message;
+        IsSuccess = response.IsSuccess;
+
+        _isLoading = false;
+        await Refresh();
+        StateHasChanged();
+    }
+
+    private void OnModalClose()
+    {
+        _isModalVisible = false;
+        SelectedUser = new();
+    }
+
+    private async Task OnModalSave()
+    {
+        _isModalVisible = false;
+        _isLoading = true;
+        StateHasChanged();
+
+        var response = await UserScheduleService.AddUserToSchedule(new AddUserToScheduleDto
+        {
+            ScheduleId = Schedule.Id,
+            UserId = SelectedUser.UserId
+        });
+
+        Message = response.Message;
+        IsSuccess = response.IsSuccess;
+        await Refresh();
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Refresh();
+        }
+    }
+
+    private async Task Refresh()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        var scheduleResponse = await ScheduleService.GetScheduleById(Id);
+        if (!scheduleResponse.IsSuccess)
+        {
+            IsSuccess = false;
+            Message = scheduleResponse.Message;
+            _isLoading = false;
+            StateHasChanged();
+            return;
+        }
+
+        Schedule = scheduleResponse.Data!;
+
+        var userResponse = await UserScheduleService.GetUsersInSchedule(Id);
+        if (!userResponse.IsSuccess)
+        {
+            IsSuccess = false;
+            Message = userResponse.Message;
+            _isLoading = false;
+            StateHasChanged();
+            return;
+        }
+
+        UsersInSchedule = userResponse.Data!;
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+}

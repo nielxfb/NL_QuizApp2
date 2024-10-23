@@ -24,7 +24,7 @@ public class GetUsersInScheduleHandler : IQueryHandler<GetUsersInScheduleQuery, 
         if (schedule == null) throw new ArgumentException("Schedule not found.");
 
         var users = await _repository.GetByScheduleIdAsync(query.ScheduleId);
-        if (users == null) throw new ArgumentException("No users found in this schedule.");
+        if (users == null || users.Count == 0) throw new ArgumentException("No users found in this schedule.");
 
         return new UsersInScheduleDto
         {

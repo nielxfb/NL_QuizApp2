@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuizApp.Application.Commands;
 using QuizApp.Application.Commands.Handlers;
@@ -21,12 +22,14 @@ public class UserController : ControllerBase
 
     private readonly IQueryHandler<LoginUserQuery, UserDetailsDto> _loginUserHandler;
     private readonly IQueryHandler<LoginByCookieQuery, UserDetailsDto> _loginByCookieHandler;
+    private readonly IQueryHandler<GetUsersQuery, List<UserDetailsDto>> _getUsersHandler;
 
-    public UserController(ICommandHandler<RegisterUserCommand> registerUserHandler, IQueryHandler<LoginUserQuery, UserDetailsDto> loginUserHandler, IQueryHandler<LoginByCookieQuery, UserDetailsDto> loginByCookieHandler)
+    public UserController(ICommandHandler<RegisterUserCommand> registerUserHandler, IQueryHandler<LoginUserQuery, UserDetailsDto> loginUserHandler, IQueryHandler<LoginByCookieQuery, UserDetailsDto> loginByCookieHandler, IQueryHandler<GetUsersQuery, List<UserDetailsDto>> getUsersHandler)
     {
         _registerUserHandler = registerUserHandler;
         _loginUserHandler = loginUserHandler;
         _loginByCookieHandler = loginByCookieHandler;
+        _getUsersHandler = getUsersHandler;
     }
 
     [HttpPost("register")]
@@ -75,6 +78,21 @@ public class UserController : ControllerBase
         catch (Exception ex)
         {
             return BadRequest(ex);
+        }
+    }
+
+    [HttpGet("get-users")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetUsers()
+    {
+        try
+        {
+            var users = await _getUsersHandler.HandleAsync(new GetUsersQuery());
+            return Ok(users);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
         }
     }
 }

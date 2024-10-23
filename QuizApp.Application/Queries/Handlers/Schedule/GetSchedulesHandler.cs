@@ -23,7 +23,11 @@ public class GetSchedulesHandler : IQueryHandler<GetSchedulesQuery, List<Schedul
         return schedules.Select(schedule => new ScheduleDetailsDto
         {
             Id = schedule.ScheduleId,
-            Quiz = schedule.Quiz,
+            Quiz = new QuizDetailsDto
+            {
+                Id = schedule.QuizId,
+                Title = schedule.Quiz.Title,
+            },
             StartDate = schedule.StartDate,
             EndDate = schedule.EndDate
         }).ToList();

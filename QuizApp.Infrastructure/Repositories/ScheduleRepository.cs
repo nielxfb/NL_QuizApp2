@@ -30,7 +30,10 @@ public class ScheduleRepository : IScheduleRepository
     public async Task<Schedule?> GetByIdAsync(Guid scheduleId)
     {
         return await _context.Schedules
-            .FindAsync(scheduleId);
+            .Include(s => s.Quiz)
+            .Include(s => s.UserSchedules)
+            .Where(s => s.ScheduleId == scheduleId)
+            .FirstOrDefaultAsync();
     }
 
     public Task UpdateAsync(Schedule schedule)
