@@ -1,0 +1,143 @@
+@page "/TakeQuiz/{Id}"
+@layout NavbarLayout
+
+@inject HttpClient HttpClient
+@inject ScheduleService ScheduleService
+@inject QuizService QuizService
+@inject QuestionService QuestionService
+
+<PageTitle>Quiz App</PageTitle>
+
+<p class="text-danger">@ErrorMessage</p>
+
+<h3 class="w-100 d-flex flex-row-reverse">
+    Time Remaining: @(new DateTime(_timeRemaining.Ticks).ToLongTimeString())
+</h3>
+
+<div class="d-flex flex-column w-100 gap-2">
+
+    @foreach (var question in Questions)
+    {
+        <div class="border rounded-3 shadow-sm py-lg-3 px-lg-4">
+
+            @if (!string.IsNullOrEmpty(question.ImageUrl))
+            {
+                <img src="@($"{HttpClient.BaseAddress}{question.ImageUrl}")" class="rounded mx-auto d-block w-25" alt="Question Image"/>
+            }
+
+            <div class="d-flex justify-content-between align-items-center p-2">
+                <h5>@question.QuestionText</h5>
+            </div>
+
+            <div class="d-flex flex-column gap-2 p-2">
+                @if (question.Options.Count == 0)
+                {
+                    <p class="text-danger">There are no options for this question.</p>
+                }
+
+                @foreach (var option in question.Options)
+                {
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="radio"/>
+                        <div class="p-0 m-0 d-flex align-items-center gap-2">
+                            <div class="p-0 m-0 d-flex align-items-center">
+                                <p class="fw-bold m-0">
+                                    @(option.OptionChoice)
+                                </p>
+                                .
+                            </div>
+                            <p class="p-0 m-0 me-2">@option.OptionText</p>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+        </div>
+    }
+
+</div>
+
+<Loading IsLoading="_isLoading"/>
+
+@code {
+
+    [Parameter] public string Id { get; set; } = string.Empty;
+    private bool _isLoading = true;
+    private DateTime _serverTime;
+    private TimeSpan _timeRemaining;
+    private DateTime _targetTime = DateTime.MinValue;
+    private string ErrorMessage { get; set; } = string.Empty;
+    private ScheduleDetailsDto Schedule { get; set; } = new();
+    private List<QuestionDto> Questions { get; set; } = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _isLoading = true;
+            var scheduleResponse = await ScheduleService.GetScheduleById(Id);
+            if (!scheduleResponse.IsSuccess)
+            {
+                ErrorMessage = scheduleResponse.Message;
+                _isLoading = false;
+                StateHasChanged();
+                return;
+            }
+
+            Schedule = scheduleResponse.Data!;
+            _targetTime = Schedule.EndDate;
+
+            var quizResponse = await QuizService.GetQuizById(Schedule.Quiz.Id.ToString());
+            if (!quizResponse.IsSuccess)
+            {
+                ErrorMessage = quizResponse.Message;
+                _isLoading = false;
+                StateHasChanged();
+                return;
+            }
+
+            var quiz = quizResponse.Data!;
+            var questionResponse = await QuestionService.GetQuestionsInQuiz(quiz.Id.ToString());
+            if (!questionResponse.IsSuccess)
+            {
+                ErrorMessage = questionResponse.Message;
+                _isLoading = false;
+                StateHasChanged();
+                return;
+            }
+
+            Questions = questionResponse.Data!;
+            
+            StateHasChanged();
+            _isLoading = false;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var connection = new HubConnectionBuilder()
+            .WithUrl($"{HttpClient.BaseAddress}TimeHub")
+            .Build();
+
+        connection.On<DateTime>("ReceiveTime", time =>
+        {
+            _serverTime = time;
+            CalculateTimeRemaining();
+            InvokeAsync(StateHasChanged);
+        });
+
+        await connection.StartAsync();
+    }
+
+    private void CalculateTimeRemaining()
+    {
+        _timeRemaining = _targetTime - _serverTime.ToUniversalTime();
+
+        if (_timeRemaining <= TimeSpan.Zero)
+        {
+            _timeRemaining = TimeSpan.Zero;
+        }
+    }
+
+}

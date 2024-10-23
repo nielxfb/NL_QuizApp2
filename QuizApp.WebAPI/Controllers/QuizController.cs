@@ -55,7 +55,7 @@ public class QuizController : ControllerBase
     }
 
     [HttpGet("get-quiz-by-id")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> GetQuizByIdAsync([FromQuery] Guid id)
     {
         if (id == Guid.Empty) return BadRequest("Id cannot be empty");

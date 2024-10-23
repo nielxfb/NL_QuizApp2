@@ -35,22 +35,22 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _isLoading = true;
-        
         if (firstRender)
         {
+            _isLoading = true;
+
             StateHasChanged();
-            
+
             var response = await UserService.GetUserDetails();
             if (response.IsSuccess)
             {
                 Nav.NavigateTo("/");
                 return;
             }
-        }
 
-        _isLoading = false;
-        StateHasChanged();
+            _isLoading = false;
+            StateHasChanged();
+        }
     }
 
     private async Task Handle()

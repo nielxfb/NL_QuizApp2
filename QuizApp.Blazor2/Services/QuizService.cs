@@ -221,4 +221,49 @@ public class QuizService
             };
         }
     }
+
+    public async Task<Response<List<QuizDetailsDto>>> GetQuizzesForUser(Guid userId)
+    {
+        var cookie = await _cookie.GetValue("user_cookie");
+
+        if (cookie == "")
+        {
+            return new Response<List<QuizDetailsDto>>
+            {
+                IsSuccess = false,
+                Message = "You are not authorized to perform this action",
+            };
+        }
+
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cookie);
+
+        try
+        {
+            var response = await _httpClient.GetAsync("api/UserSchedule/get-user-schedules?id=" + userId);
+            if (!response.IsSuccessStatusCode)
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                return new Response<List<QuizDetailsDto>>
+                {
+                    IsSuccess = false,
+                    Message = message,
+                };
+            }
+            
+            var content = await response.Content.ReadFromJsonAsync<List<QuizDetailsDto>>();
+            return new Response<List<QuizDetailsDto>>
+            {
+                IsSuccess = true,
+                Data = content,
+            };
+        }
+        catch (Exception e)
+        {
+            return new Response<List<QuizDetailsDto>>
+            {
+                IsSuccess = false,
+                Message = $"An error occurred: {e.Message}",
+            };
+        }
+    }
 }

@@ -96,9 +96,8 @@ public class UserService
         var user = await _session.GetItemAsync<UserDetailsDto>("user");
         var cookie = await _cookie.GetValue("user_cookie");
 
-        if (user == null && cookie == "")
+        if (cookie == "")
         {
-            await _cookie.SetValue("user_cookie", "");
             await _session.RemoveItemAsync("user");
             return new Response<UserDetailsDto>
             {
@@ -128,10 +127,6 @@ public class UserService
                 user.FullName,
                 user.Role,
             });
-        }
-        else
-        {
-            await _session.RemoveItemAsync("user");
         }
 
         if (user != null)

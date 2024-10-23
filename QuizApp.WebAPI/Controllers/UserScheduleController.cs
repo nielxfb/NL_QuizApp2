@@ -17,12 +17,9 @@ public class UserScheduleController : ControllerBase
     private readonly ICommandHandler<AddUserToScheduleCommand> _addUserToScheduleHandler;
     private readonly ICommandHandler<RemoveUserFromScheduleCommand> _removeUserFromScheduleHandler;
     private readonly IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> _getUsersInScheduleHandler;
-    private readonly IQueryHandler<GetUserSchedulesQuery, UserSchedulesDto> _getUserSchedulesHandler;
+    private readonly IQueryHandler<GetUserSchedulesQuery, List<UserSchedulesDto>> _getUserSchedulesHandler;
 
-    public UserScheduleController(ICommandHandler<AddUserToScheduleCommand> addUserToScheduleHandler,
-        ICommandHandler<RemoveUserFromScheduleCommand> removeUserFromScheduleHandler,
-        IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> getUsersInScheduleHandler,
-        IQueryHandler<GetUserSchedulesQuery, UserSchedulesDto> getUserSchedulesHandler)
+    public UserScheduleController(ICommandHandler<AddUserToScheduleCommand> addUserToScheduleHandler, ICommandHandler<RemoveUserFromScheduleCommand> removeUserFromScheduleHandler, IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> getUsersInScheduleHandler, IQueryHandler<GetUserSchedulesQuery, List<UserSchedulesDto>> getUserSchedulesHandler)
     {
         _addUserToScheduleHandler = addUserToScheduleHandler;
         _removeUserFromScheduleHandler = removeUserFromScheduleHandler;
@@ -46,7 +43,7 @@ public class UserScheduleController : ControllerBase
     }
 
     [HttpGet("get-user-schedules")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> GetUserSchedules([FromQuery] GetUserSchedulesDto dto)
     {
         try

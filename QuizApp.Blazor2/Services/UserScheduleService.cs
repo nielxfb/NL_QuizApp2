@@ -30,7 +30,7 @@ public class UserScheduleService
         }
 
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cookie);
-        
+
         if (!Guid.TryParse(scheduleId, out _))
         {
             return new Response<UsersInScheduleDto>
@@ -42,7 +42,8 @@ public class UserScheduleService
 
         try
         {
-            var response = await _httpClient.GetAsync("api/UserSchedule/get-users-in-schedule?scheduleId=" + scheduleId);
+            var response =
+                await _httpClient.GetAsync("api/UserSchedule/get-users-in-schedule?scheduleId=" + scheduleId);
             if (!response.IsSuccessStatusCode)
             {
                 var message = await response.Content.ReadAsStringAsync();
@@ -52,6 +53,7 @@ public class UserScheduleService
                     Message = message,
                 };
             }
+
             var usersInSchedule = await response.Content.ReadFromJsonAsync<UsersInScheduleDto>();
             return new Response<UsersInScheduleDto>
             {
@@ -68,7 +70,52 @@ public class UserScheduleService
             };
         }
     }
-    
+
+    public async Task<Response<List<UserSchedulesDto>>> GetUserSchedules(Guid userId)
+    {
+        var cookie = await _cookie.GetValue("user_cookie");
+
+        if (cookie == "")
+        {
+            return new Response<List<UserSchedulesDto>>
+            {
+                IsSuccess = false,
+                Message = "You are not authorized to perform this action",
+            };
+        }
+
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cookie);
+
+        try
+        {
+            var response = await _httpClient.GetAsync("api/UserSchedule/get-user-schedules?userId=" + userId);
+            if (!response.IsSuccessStatusCode)
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                return new Response<List<UserSchedulesDto>>
+                {
+                    IsSuccess = false,
+                    Message = message,
+                };
+            }
+
+            var content = await response.Content.ReadFromJsonAsync<List<UserSchedulesDto>>();
+            return new Response<List<UserSchedulesDto>>
+            {
+                IsSuccess = true,
+                Data = content,
+            };
+        }
+        catch (Exception e)
+        {
+            return new Response<List<UserSchedulesDto>>
+            {
+                IsSuccess = false,
+                Message = "An error occurred: " + e.Message,
+            };
+        }
+    }
+
     public async Task<Response<AddUserToScheduleDto>> AddUserToSchedule(AddUserToScheduleDto dto)
     {
         var cookie = await _cookie.GetValue("user_cookie");
@@ -83,7 +130,7 @@ public class UserScheduleService
         }
 
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cookie);
-        
+
         try
         {
             var response = await _httpClient.PostAsJsonAsync("api/UserSchedule/add-user-to-schedule", dto);
@@ -130,7 +177,8 @@ public class UserScheduleService
 
         try
         {
-            var response = await _httpClient.DeleteAsync("api/UserSchedule/remove-user-from-schedule?userId=" + dto.UserId + "&scheduleId=" + dto.ScheduleId);
+            var response = await _httpClient.DeleteAsync("api/UserSchedule/remove-user-from-schedule?userId=" +
+                                                         dto.UserId + "&scheduleId=" + dto.ScheduleId);
             var message = await response.Content.ReadAsStringAsync();
             return new Response<RemoveUserFromScheduleDto>
             {

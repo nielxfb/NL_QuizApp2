@@ -28,7 +28,10 @@ public class QuizRepository : IQuizRepository
     public async Task<Quiz?> GetByIdAsync(Guid quizId)
     {
         return await _context.Quizzes
-            .FindAsync(quizId);
+            .Include(q => q.Questions)
+            .ThenInclude(q => q.Options)
+            .Where(q => q.QuizId == quizId)
+            .FirstOrDefaultAsync();
     }
 
     public Task UpdateAsync(Quiz quiz)

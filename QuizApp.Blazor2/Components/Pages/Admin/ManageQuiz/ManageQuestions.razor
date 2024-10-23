@@ -7,6 +7,7 @@
 @inject OptionService OptionService
 @inject HttpClient HttpClient
 @inject NavigationManager Nav
+<PageTitle>Quiz App</PageTitle>
 
 <Loading IsLoading="@_isLoading"/>
 
@@ -160,7 +161,7 @@
     private async Task OnAddModalSave()
     {
         ErrorMessage = "";
-        
+
         var response = await QuestionService.AddQuestion(new AddQuestionDto
         {
             QuestionText = NewQuestion.QuestionText,
@@ -188,7 +189,7 @@
     private async Task OnUpdateModalSave()
     {
         ErrorMessage = "";
-        
+
         var response = await QuestionService.UpdateQuestion(new UpdateQuestionDto
         {
             QuestionId = SelectedQuestion.QuestionId,
@@ -286,10 +287,9 @@
             }
 
             await Refresh();
+            _isLoading = false;
+            StateHasChanged();
         }
-
-        _isLoading = false;
-        StateHasChanged();
     }
 
     private async Task Refresh()

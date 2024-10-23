@@ -52,7 +52,7 @@ public class ScheduleController : ControllerBase
     }
 
     [HttpGet("get-schedule-by-id")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> GetScheduleById([FromQuery] Guid id)
     {
         if (id == Guid.Empty) return BadRequest("Id cannot be empty");

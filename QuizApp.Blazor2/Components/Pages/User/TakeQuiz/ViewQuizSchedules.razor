@@ -1,0 +1,101 @@
+@page "/ViewQuizSchedules"
+@layout NavbarLayout
+
+@inject UserService UserService
+@inject NavigationManager Nav
+@inject UserScheduleService UserScheduleService
+
+<PageTitle>Quiz App</PageTitle>
+<h3 class="mb-4">View Quiz Schedules</h3>
+
+<p class="text-danger mb-2">@ErrorMessage</p>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th scope="col">No.</th>
+        <th scope="col">Title</th>
+        <th scope="col">Start Date</th>
+        <th scope="col">End Date</th>
+        <th scope="col">Status</th>
+        <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var schedule in UserSchedules)
+    {
+        <tr>
+            <th scope="row">@(UserSchedules.IndexOf(schedule) + 1)</th>
+            <td>@schedule.Title</td>
+            <td>@schedule.StartDate.ToLocalTime()</td>
+            <td>@schedule.EndDate.ToLocalTime()</td>
+            <td>@schedule.Status</td>
+            <td>
+                <button class="btn btn-success" @onclick="() => TakeQuiz(schedule.ScheduleId)">Take Quiz</button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<Loading IsLoading="@_isLoading"/>
+
+@code {
+
+    private List<UserSchedulesDto> UserSchedules { get; set; } = new();
+    private string ErrorMessage { get; set; } = string.Empty;
+    private bool _isLoading;
+
+    private void TakeQuiz(Guid scheduleId)
+    {
+        if (DateTime.UtcNow < UserSchedules.First(s => s.ScheduleId == scheduleId).StartDate)
+        {
+            ErrorMessage = "The quiz has not started yet.";
+            return;
+        }
+        
+        if (DateTime.UtcNow > UserSchedules.First(s => s.ScheduleId == scheduleId).EndDate)
+        {
+            ErrorMessage = "The quiz has ended.";
+            return;
+        }
+        
+        
+        Nav.NavigateTo($"/TakeQuiz/{scheduleId}");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            var userResponse = await UserService.GetUserDetails();
+            if (!userResponse.IsSuccess)
+            {
+                ErrorMessage = userResponse.Message;
+                _isLoading = false;
+                StateHasChanged();
+                return;
+            }
+
+            var user = userResponse.Data!;
+
+            var scheduleResponse = await UserScheduleService.GetUserSchedules(user.UserId);
+            if (!scheduleResponse.IsSuccess)
+            {
+                ErrorMessage = scheduleResponse.Message;
+                _isLoading = false;
+                StateHasChanged();
+                return;
+            }
+
+            UserSchedules = scheduleResponse.Data!;
+
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+}

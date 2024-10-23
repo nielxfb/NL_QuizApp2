@@ -46,6 +46,7 @@ using QuizApp.Domain.Entities;
 using QuizApp.Domain.Interfaces;
 using QuizApp.Infrastructure.Persistence;
 using QuizApp.Infrastructure.Repositories;
+using QuizApp.Infrastructure.SignalR;
 
 var options = new WebApplicationOptions
 {
@@ -140,10 +141,13 @@ builder.Services.AddScoped<IQueryHandler<GetQuizByIdQuery, QuizDetailsDto>, GetQ
 builder.Services.AddScoped<IQueryHandler<GetSchedulesQuery, List<ScheduleDetailsDto>>, GetSchedulesHandler>();
 builder.Services.AddScoped<IQueryHandler<GetScheduleByIdQuery, ScheduleDetailsDto>, GetScheduleByIdHandler>();
 builder.Services.AddScoped<IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto>, GetUsersInScheduleHandler>();
-builder.Services.AddScoped<IQueryHandler<GetUserSchedulesQuery, UserSchedulesDto>, GetUserSchedulesHandler>();
+builder.Services.AddScoped<IQueryHandler<GetUserSchedulesQuery, List<UserSchedulesDto>>, GetUserSchedulesHandler>();
 builder.Services.AddScoped<IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>>, GetQuestionsInQuizHandler>();
 builder.Services.AddScoped<IQueryHandler<GetByQuestionIdQuery, List<OptionDto>>, GetByQuestionIdHandler>();
 builder.Services.AddScoped<IQueryHandler<GetUserResponsesInQuizQuery, ResponseDto>, GetUserResponsesInQuizHandler>();
+
+builder.Services.AddSignalR();
+builder.Services.AddHostedService<TimeBroadcastService>();
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
@@ -171,6 +175,8 @@ builder.Services.AddAuthentication(options =>
     });
 
 var app = builder.Build();
+
+app.MapHub<TimeHub>("/TimeHub");
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("Starting application..");
