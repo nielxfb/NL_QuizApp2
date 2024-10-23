@@ -16,6 +16,10 @@ public class AddQuizHandler : ICommandHandler<AddQuizCommand>
 
     public async Task HandleAsync(AddQuizCommand command)
     {
+        var quizzes = await _repository.GetAllAsync();
+        if (quizzes.Any(q => q.Title == command.Title))
+            throw new Exception("Quiz with the same title already exists.");
+        
         var quiz = new Domain.Entities.Quiz()
         {
             QuizId = Guid.NewGuid(),
