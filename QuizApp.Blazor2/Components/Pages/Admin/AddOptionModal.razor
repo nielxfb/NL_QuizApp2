@@ -1,0 +1,55 @@
+@using QuizApp.Application.DTOs.Option
+@if (IsVisible)
+{
+    <div class="modal fade show d-block" style="display:block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Option to Question</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body d-flex flex-column gap-2">
+                    <div class="form-group">
+                        <label class="form-label">Choice</label>
+                        <InputSelect class="form-select" @bind-Value="@Option.OptionChoice">
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </InputSelect>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Text</label>
+                        <InputText class="form-control" @bind-Value="@Option.OptionText" />
+                    </div>
+                    <div class="form-group d-flex gap-2">
+                        <InputCheckbox class="form-check" @bind-Value="@Option.IsCorrect" />
+                        <label class="form-check-label">Is Correct</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="Save">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    [Parameter] public OptionDto Option { get; set; } = new();
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private void Save()
+    {
+        OnSave.InvokeAsync();
+    }
+    
+    private void Close()
+    {
+        OnClose.InvokeAsync();
+    }
+}

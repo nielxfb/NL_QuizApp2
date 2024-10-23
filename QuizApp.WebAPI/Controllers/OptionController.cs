@@ -35,6 +35,8 @@ public class OptionController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AddOption([FromBody] AddOptionDto dto)
     {
+        Console.WriteLine($"qid: {dto.QuestionId} oc: {dto.OptionChoice} ot: {dto.OptionText}");
+        
         if (dto.QuestionId == Guid.Empty || dto.OptionChoice == "" || dto.OptionText == "")
             return BadRequest("All fields are required");
 
@@ -53,7 +55,7 @@ public class OptionController : ControllerBase
 
     [HttpDelete("remove-option")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> RemoveOption([FromBody] RemoveOptionDto dto)
+    public async Task<IActionResult> RemoveOption([FromQuery] RemoveOptionDto dto)
     {
         if (dto.QuestionId == Guid.Empty || dto.OptionChoice == "") return BadRequest("All fields are required");
 

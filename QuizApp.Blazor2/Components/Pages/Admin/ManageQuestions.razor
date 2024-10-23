@@ -1,8 +1,11 @@
 @page "/ManageQuestions/{Id}"
+@using System.Security
+@using QuizApp.Application.DTOs.Option
 @layout NavbarLayout
 
 @inject QuizService QuizService
 @inject QuestionService QuestionService
+@inject OptionService OptionService
 @inject HttpClient HttpClient
 
 <Loading IsLoading="@_isLoading"/>
@@ -18,13 +21,13 @@
 
             @if (!string.IsNullOrEmpty(question.ImageUrl))
             {
-                <img src="@($"{HttpClient.BaseAddress}{question.ImageUrl}")" class="rounded mx-auto d-block" alt="Question Image"/>
+                <img src="@($"{HttpClient.BaseAddress}{question.ImageUrl}")" class="rounded mx-auto d-block w-25" alt="Question Image"/>
             }
 
             <div class="d-flex justify-content-between align-items-center p-2">
                 <h5>@question.QuestionText</h5>
                 <div>
-                    <button class="btn btn-info" @onclick="() => AddImage(question)">Add Image</button>
+                    <button class="btn btn-success" @onclick="() => AddImage(question)">Add Image</button>
                     <button class="btn btn-primary" @onclick="() => EditQuestion(question)" type="button">Edit Question</button>
                     <button class="btn btn-danger" @onclick="() => DeleteQuestion(question.QuestionId.ToString())">Delete Question</button>
                 </div>
@@ -40,19 +43,35 @@
                 {
                     <div class="d-flex align-items-center gap-2">
                         <input type="radio" disabled/>
-                        <p class="p-0 m-0">@option.OptionText</p>
+                        <div class="p-0 m-0 d-flex align-items-center gap-2">
+                            <div class="p-0 m-0 d-flex align-items-center">
+                                <p class="fw-bold m-0">
+                                    @(option.OptionChoice)
+                                </p>
+                                .
+                            </div>
+                            <p class="p-0 m-0 me-2">@option.OptionText</p>
+                        </div>
+                        <button class="btn btn-danger" @onclick="() => DeleteOption(question.QuestionId, option.OptionChoice)">Delete Option</button>
+                        @if (option.IsCorrect)
+                        {
+                            <p class="p-0 m-0 text-success">Correct Option</p>
+                        }
                     </div>
                 }
                 
-                <button class="btn btn-primary">Add Option</button>
+                <p class="text-danger">@OptionErrorMessage</p>
+
+                <button class="btn btn-success" @onclick="() => AddOption(question)">Add Option</button>
             </div>
 
         </div>
     }
 
-    <button class="btn btn-primary" @onclick="AddQuestion">Add Question</button>
+    <button class="btn btn-success" @onclick="AddQuestion">Add Question</button>
 </div>
 
+<AddOptionModal Option="@NewOption" IsVisible="IsAddOptionVisible" OnClose="OnOptionModalClose" OnSave="OnOptionModalSave"/>
 <AddQuestionImage Question="@SelectedQuestion" IsVisible="IsAddImageModalVisible" OnClose="OnImageModalClose"/>
 <AddQuestionModal Question="@NewQuestion" IsVisible="IsAddModalVisible" OnClose="OnAddModalClose" OnSave="OnAddModalSave"/>
 <UpdateQuestionModal Question="@SelectedQuestion" IsVisible="IsUpdateModalVisible" OnClose="OnUpdateModalClose" OnSave="OnUpdateModalSave"/>
@@ -63,10 +82,13 @@
     private List<QuestionDto> Questions { get; set; } = new();
     private QuestionDto SelectedQuestion { get; set; } = new();
     private QuestionDto NewQuestion { get; set; } = new();
+    private OptionDto NewOption { get; set; } = new();
     private string ErrorMessage { get; set; } = string.Empty;
+    private string OptionErrorMessage { get; set; } = string.Empty;
     private bool IsUpdateModalVisible { get; set; }
     private bool IsAddModalVisible { get; set; }
     private bool IsAddImageModalVisible { get; set; }
+    private bool IsAddOptionVisible { get; set; }
     private bool _isLoading = true;
 
     private void AddImage(QuestionDto question)
@@ -85,6 +107,13 @@
         StateHasChanged();
     }
 
+    private void AddOption(QuestionDto question)
+    {
+        SelectedQuestion = question;
+        IsAddOptionVisible = true;
+        StateHasChanged();
+    }
+
     private void EditQuestion(QuestionDto question)
     {
         _isLoading = true;
@@ -92,6 +121,23 @@
 
         SelectedQuestion = question;
         IsUpdateModalVisible = true;
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task DeleteOption(Guid questionId, char optionChoice)
+    {
+        OptionErrorMessage = "";
+        _isLoading = true;
+        StateHasChanged();
+
+        var response = await OptionService.RemoveOption(new RemoveOptionDto { QuestionId = questionId, OptionChoice = optionChoice.ToString() });
+        if (!response.IsSuccess)
+        {
+            OptionErrorMessage = response.Message;
+        }
+
+        await Refresh();
         _isLoading = false;
         StateHasChanged();
     }
@@ -155,6 +201,40 @@
         SelectedQuestion = new();
         IsAddImageModalVisible = false;
         await Refresh();
+        StateHasChanged();
+    }
+
+    private void OnOptionModalClose()
+    {
+        SelectedQuestion = new();
+        IsAddOptionVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task OnOptionModalSave()
+    {
+        OptionErrorMessage = "";
+        _isLoading = true;
+        StateHasChanged();
+
+        var response = await OptionService.AddOption(new AddOptionDto
+        {
+            OptionChoice = NewOption.OptionChoice.ToString(),
+            OptionText = NewOption.OptionText,
+            IsCorrect = NewOption.IsCorrect,
+            QuestionId = SelectedQuestion.QuestionId,
+        });
+
+        if (!response.IsSuccess)
+        {
+            OptionErrorMessage = response.Message;
+        }
+
+        NewOption = new();
+
+        IsAddOptionVisible = false;
+        await Refresh();
+        _isLoading = false;
         StateHasChanged();
     }
 

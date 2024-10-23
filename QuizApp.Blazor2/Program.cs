@@ -16,6 +16,7 @@ builder.Services.AddScoped<ICookie, Cookie>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<QuizService>();
 builder.Services.AddScoped<QuestionService>();
+builder.Services.AddScoped<OptionService>();
 
 var app = builder.Build();
 
