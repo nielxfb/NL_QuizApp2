@@ -17,6 +17,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<QuizService>();
 builder.Services.AddScoped<QuestionService>();
 builder.Services.AddScoped<OptionService>();
+builder.Services.AddScoped<ScheduleService>();
 
 var app = builder.Build();
 

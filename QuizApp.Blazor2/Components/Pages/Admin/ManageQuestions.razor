@@ -2,9 +2,11 @@
 @layout NavbarLayout
 
 @inject QuizService QuizService
+@inject UserService UserService
 @inject QuestionService QuestionService
 @inject OptionService OptionService
 @inject HttpClient HttpClient
+@inject NavigationManager Nav
 
 <Loading IsLoading="@_isLoading"/>
 
@@ -13,60 +15,68 @@
 
 <div class="d-flex flex-column gap-2">
 
-    @foreach (var question in Questions)
+    @if (Questions == null || Questions.Count == 0)
     {
-        <div class="border rounded-3 shadow-sm py-lg-3 px-lg-4">
+        <p class="text-danger">There are no questions yet.</p>
+    }
+    else
+    {
+        @foreach (var question in Questions)
+        {
+            <div class="border rounded-3 shadow-sm py-lg-3 px-lg-4">
 
-            @if (!string.IsNullOrEmpty(question.ImageUrl))
-            {
-                <img src="@($"{HttpClient.BaseAddress}{question.ImageUrl}")" class="rounded mx-auto d-block w-25" alt="Question Image"/>
-            }
-
-            <div class="d-flex justify-content-between align-items-center p-2">
-                <h5>@question.QuestionText</h5>
-                <div>
-                    <button class="btn btn-success" @onclick="() => AddImage(question)">Add Image</button>
-                    <button class="btn btn-primary" @onclick="() => EditQuestion(question)" type="button">Edit Question</button>
-                    <button class="btn btn-danger" @onclick="() => DeleteQuestion(question.QuestionId.ToString())">Delete Question</button>
-                </div>
-            </div>
-
-            <div class="d-flex flex-column gap-2 p-2">
-                @if (question.Options.Count == 0)
+                @if (!string.IsNullOrEmpty(question.ImageUrl))
                 {
-                    <p class="text-danger">There are no options for this question.</p>
+                    <img src="@($"{HttpClient.BaseAddress}{question.ImageUrl}")" class="rounded mx-auto d-block w-25" alt="Question Image"/>
                 }
 
-                @foreach (var option in question.Options)
-                {
-                    <div class="d-flex align-items-center gap-2">
-                        <input type="radio" disabled/>
-                        <div class="p-0 m-0 d-flex align-items-center gap-2">
-                            <div class="p-0 m-0 d-flex align-items-center">
-                                <p class="fw-bold m-0">
-                                    @(option.OptionChoice)
-                                </p>
-                                .
-                            </div>
-                            <p class="p-0 m-0 me-2">@option.OptionText</p>
-                        </div>
-                        <button class="btn btn-danger" @onclick="() => DeleteOption(question.QuestionId, option.OptionChoice)">Delete Option</button>
-                        @if (option.IsCorrect)
-                        {
-                            <p class="p-0 m-0 text-success">Correct Option</p>
-                        }
+                <div class="d-flex justify-content-between align-items-center p-2">
+                    <h5>@question.QuestionText</h5>
+                    <div>
+                        <button class="btn btn-secondary" @onclick="() => AddImage(question)">Add Image</button>
+                        <button class="btn btn-primary" @onclick="() => EditQuestion(question)" type="button">Edit Question</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteQuestion(question.QuestionId.ToString())">Delete Question</button>
                     </div>
-                }
-                
-                <p class="text-danger">@OptionErrorMessage</p>
+                </div>
 
-                <button class="btn btn-success" @onclick="() => AddOption(question)">Add Option</button>
+                <div class="d-flex flex-column gap-2 p-2">
+                    @if (question.Options.Count == 0)
+                    {
+                        <p class="text-danger">There are no options for this question.</p>
+                    }
+
+                    @foreach (var option in question.Options)
+                    {
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="radio" disabled/>
+                            <div class="p-0 m-0 d-flex align-items-center gap-2">
+                                <div class="p-0 m-0 d-flex align-items-center">
+                                    <p class="fw-bold m-0">
+                                        @(option.OptionChoice)
+                                    </p>
+                                    .
+                                </div>
+                                <p class="p-0 m-0 me-2">@option.OptionText</p>
+                            </div>
+                            <button class="btn btn-danger" @onclick="() => DeleteOption(question.QuestionId, option.OptionChoice)">Delete Option</button>
+                            @if (option.IsCorrect)
+                            {
+                                <p class="p-0 m-0 text-success">Correct Option</p>
+                            }
+                        </div>
+                    }
+
+                    <p class="text-danger">@OptionErrorMessage</p>
+
+                    <button class="btn btn-primary" @onclick="() => AddOption(question)">Add Option</button>
+                </div>
+
             </div>
-
-        </div>
+        }
     }
 
-    <button class="btn btn-success" @onclick="AddQuestion">Add Question</button>
+
+    <button class="btn btn-primary" @onclick="AddQuestion">Add Question</button>
 </div>
 
 <AddOptionModal Option="@NewOption" IsVisible="IsAddOptionVisible" OnClose="OnOptionModalClose" OnSave="OnOptionModalSave"/>
@@ -149,6 +159,8 @@
 
     private async Task OnAddModalSave()
     {
+        ErrorMessage = "";
+        
         var response = await QuestionService.AddQuestion(new AddQuestionDto
         {
             QuestionText = NewQuestion.QuestionText,
@@ -175,6 +187,8 @@
 
     private async Task OnUpdateModalSave()
     {
+        ErrorMessage = "";
+        
         var response = await QuestionService.UpdateQuestion(new UpdateQuestionDto
         {
             QuestionId = SelectedQuestion.QuestionId,
@@ -256,6 +270,21 @@
     {
         if (firstRender)
         {
+            var response = await UserService.GetUserDetails();
+
+            if (!response.IsSuccess)
+            {
+                Nav.NavigateTo("/Login");
+                return;
+            }
+
+            var user = response.Data!;
+
+            if (user.Role != "Admin")
+            {
+                Nav.NavigateTo("/");
+            }
+
             await Refresh();
         }
 

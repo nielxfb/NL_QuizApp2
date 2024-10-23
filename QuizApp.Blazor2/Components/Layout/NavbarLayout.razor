@@ -1,5 +1,4 @@
 @using QuizApp.Blazor2.Components.Pages
-@using QuizApp.Blazor2.Services
 @inherits LayoutComponentBase
 
 @inject NavigationManager Nav
@@ -23,7 +22,7 @@
                             <NavLink class="nav-link" href="/ManageQuiz">Manage Quiz</NavLink>
                         </li>
                         <li class="nav-item">
-                            <NavLink class="nav-link" href="#">Manage Schedules</NavLink>
+                            <NavLink class="nav-link" href="/ManageSchedules">Manage Schedules</NavLink>
                         </li>
                     }
                     else
@@ -34,7 +33,7 @@
                     }
 
                     <li class="nav-item" @onclick="LogOut">
-                        <NavLink class="nav-link" href="#">Log Out</NavLink>
+                        <NavLink class="nav-link">Log Out</NavLink>
                     </li>
                 </ul>
             </div>
