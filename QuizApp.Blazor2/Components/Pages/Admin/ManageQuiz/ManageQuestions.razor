@@ -12,68 +12,61 @@
 <Loading IsLoading="@_isLoading"/>
 
 <h3>Manage Questions for @Quiz.Title</h3>
-<p class="text-danger">@ErrorMessage</p>
 
 <div class="d-flex flex-column gap-2">
 
-    @if (Questions == null || Questions.Count == 0)
+    <p class="text-danger">@ErrorMessage</p>
+    @foreach (var question in Questions)
     {
-        <p class="text-danger">There are no questions yet.</p>
-    }
-    else
-    {
-        @foreach (var question in Questions)
-        {
-            <div class="border rounded-3 shadow-sm py-lg-3 px-lg-4">
+        <div class="border rounded-3 shadow-sm py-lg-3 px-lg-4">
 
-                @if (!string.IsNullOrEmpty(question.ImageUrl))
+            @if (!string.IsNullOrEmpty(question.ImageUrl))
+            {
+                <img src="@($"{HttpClient.BaseAddress}{question.ImageUrl}")" class="rounded mx-auto d-block w-25" alt="Question Image"/>
+            }
+
+            <div class="d-flex justify-content-between align-items-center p-2">
+                <h5>@question.QuestionText</h5>
+                <div>
+                    <button class="btn btn-secondary" @onclick="() => AddImage(question)">Add Image</button>
+                    <button class="btn btn-primary" @onclick="() => EditQuestion(question)" type="button">Edit Question</button>
+                    <button class="btn btn-danger" @onclick="() => DeleteQuestion(question.QuestionId.ToString())">Delete Question</button>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column gap-2 p-2">
+                @if (question.Options.Count == 0)
                 {
-                    <img src="@($"{HttpClient.BaseAddress}{question.ImageUrl}")" class="rounded mx-auto d-block w-25" alt="Question Image"/>
+                    <p class="text-danger">There are no options for this question.</p>
                 }
 
-                <div class="d-flex justify-content-between align-items-center p-2">
-                    <h5>@question.QuestionText</h5>
-                    <div>
-                        <button class="btn btn-secondary" @onclick="() => AddImage(question)">Add Image</button>
-                        <button class="btn btn-primary" @onclick="() => EditQuestion(question)" type="button">Edit Question</button>
-                        <button class="btn btn-danger" @onclick="() => DeleteQuestion(question.QuestionId.ToString())">Delete Question</button>
-                    </div>
-                </div>
-
-                <div class="d-flex flex-column gap-2 p-2">
-                    @if (question.Options.Count == 0)
-                    {
-                        <p class="text-danger">There are no options for this question.</p>
-                    }
-
-                    @foreach (var option in question.Options)
-                    {
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="radio" disabled/>
-                            <div class="p-0 m-0 d-flex align-items-center gap-2">
-                                <div class="p-0 m-0 d-flex align-items-center">
-                                    <p class="fw-bold m-0">
-                                        @(option.OptionChoice)
-                                    </p>
-                                    .
-                                </div>
-                                <p class="p-0 m-0 me-2">@option.OptionText</p>
+                @foreach (var option in question.Options)
+                {
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="radio" disabled/>
+                        <div class="p-0 m-0 d-flex align-items-center gap-2">
+                            <div class="p-0 m-0 d-flex align-items-center">
+                                <p class="fw-bold m-0">
+                                    @(option.OptionChoice)
+                                </p>
+                                .
                             </div>
-                            <button class="btn btn-danger" @onclick="() => DeleteOption(question.QuestionId, option.OptionChoice)">Delete Option</button>
-                            @if (option.IsCorrect)
-                            {
-                                <p class="p-0 m-0 text-success">Correct Option</p>
-                            }
+                            <p class="p-0 m-0 me-2">@option.OptionText</p>
                         </div>
-                    }
+                        <button class="btn btn-danger" @onclick="() => DeleteOption(question.QuestionId, option.OptionChoice)">Delete Option</button>
+                        @if (option.IsCorrect)
+                        {
+                            <p class="p-0 m-0 text-success">Correct Option</p>
+                        }
+                    </div>
+                }
 
-                    <p class="text-danger">@OptionErrorMessage</p>
+                <p class="text-danger">@OptionErrorMessage</p>
 
-                    <button class="btn btn-primary" @onclick="() => AddOption(question)">Add Option</button>
-                </div>
-
+                <button class="btn btn-primary" @onclick="() => AddOption(question)">Add Option</button>
             </div>
-        }
+
+        </div>
     }
 
 

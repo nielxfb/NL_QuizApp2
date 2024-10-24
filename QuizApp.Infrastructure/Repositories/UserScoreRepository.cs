@@ -28,4 +28,14 @@ public class UserScoreRepository : IUserScoreRepository
             .Where(us => us.UserId == userId && us.ScheduleId == scheduleId)
             .FirstOrDefaultAsync();
     }
+
+    public Task<List<UserScore>> GetByUserAsync(Guid userId)
+    {
+        return _context.UserScores
+            .Include(us => us.Schedule)
+            .ThenInclude(s => s.Quiz)
+            .Include(us => us.User)
+            .Where(us => us.UserId == userId)
+            .ToListAsync();
+    }
 }

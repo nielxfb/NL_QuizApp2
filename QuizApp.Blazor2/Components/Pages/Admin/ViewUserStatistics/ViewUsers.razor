@@ -1,0 +1,78 @@
+@page "/ViewUsers"
+@layout NavbarLayout
+
+@inject UserService UserService
+
+<h3>View Users</h3>
+<p class="text-danger">@ErrorMessage</p>
+
+<div class="d-flex flex-row-reverse flex-wrap gap-4 w-100">
+    @foreach (var user in Users)
+    {
+        <div class="card" style="width: 18rem;">
+            <div class="card-header fw-bold">
+                @user.Initial
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">@user.FullName</h5>
+                <h6 class="card-subtitle mb-2 text-muted">@user.Role</h6>
+            </div>
+            <div class="card-footer d-flex">
+                @if (user.Role == "User")
+                {
+                    <button class="btn btn-primary" @onclick="() => ViewUserStatistics(user.UserId)">View User Statistics</button>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<Loading IsLoading="_isLoading"/>
+@if (_isModalVisible)
+{
+    <UserStatisticsModal UserId="@SelectedUserId" OnClose="OnClose"/>
+}
+
+
+@code {
+
+    private List<UserDetailsDto> Users { get; set; } = new();
+    private bool _isLoading = true;
+    private string ErrorMessage { get; set; } = string.Empty;
+
+    private bool _isModalVisible;
+    private Guid SelectedUserId { get; set; }
+
+    private void ViewUserStatistics(Guid userId)
+    {
+        SelectedUserId = userId;
+        _isModalVisible = true;
+        StateHasChanged();
+    }
+
+    private void OnClose()
+    {
+        _isModalVisible = false;
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var response = await UserService.GetUsers();
+            if (!response.IsSuccess)
+            {
+                _isLoading = false;
+                ErrorMessage = response.Message;
+                StateHasChanged();
+                return;
+            }
+
+            Users = response.Data!;
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+}

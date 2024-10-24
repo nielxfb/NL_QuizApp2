@@ -33,7 +33,7 @@
             <td>
                 @if (schedule.Status == "Completed")
                 {
-                    <button class="btn btn-primary">Show Detail</button>
+                    <button class="btn btn-primary" @onclick="() => ViewDetail(schedule.ScheduleId)">Show Detail</button>
                 }
                 else
                 {
@@ -46,12 +46,30 @@
 </table>
 
 <Loading IsLoading="@_isLoading"/>
+@if (_isModalVisible)
+{
+    <ViewScoreDetail UserId="@User.UserId" ScheduleId="@SelectedScheduleId" OnClose="OnModalClose"/>
+}
 
 @code {
 
     private List<UserSchedulesDto> UserSchedules { get; set; } = new();
     private string ErrorMessage { get; set; } = string.Empty;
     private bool _isLoading;
+    private bool _isModalVisible;
+    private UserDetailsDto User { get; set; } = new();
+    private Guid SelectedScheduleId { get; set; }
+
+    private void ViewDetail(Guid scheduleId)
+    {
+        SelectedScheduleId = scheduleId;
+        _isModalVisible = true;
+    }
+
+    private void OnModalClose()
+    {
+        _isModalVisible = false;
+    }
 
     private async Task TakeQuiz(Guid scheduleId)
     {
@@ -82,20 +100,9 @@
             return;
         }
 
-        var userResponse = await UserService.GetUserDetails();
-        if (!userResponse.IsSuccess)
-        {
-            ErrorMessage = userResponse.Message;
-            _isLoading = false;
-            StateHasChanged();
-            return;
-        }
-
-        var user = userResponse.Data!;
-
         var updateResponse = await UserScheduleService.UpdateStatus(new UpdateStatusDto
         {
-            UserId = user.UserId,
+            UserId = User.UserId,
             ScheduleId = scheduleId,
             Status = "In Progress"
         });
@@ -127,9 +134,9 @@
                 return;
             }
 
-            var user = userResponse.Data!;
+            User = userResponse.Data!;
 
-            var scheduleResponse = await UserScheduleService.GetUserSchedules(user.UserId);
+            var scheduleResponse = await UserScheduleService.GetUserSchedules(User.UserId);
             if (!scheduleResponse.IsSuccess)
             {
                 ErrorMessage = scheduleResponse.Message;

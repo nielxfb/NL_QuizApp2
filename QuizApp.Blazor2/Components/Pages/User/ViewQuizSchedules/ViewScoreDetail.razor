@@ -1,0 +1,103 @@
+@using System.Globalization
+@inject UserScoreService UserScoreService
+
+<Loading IsLoading="_isLoading"/>
+
+<div class="modal fade show d-block" style="display:block;" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Result Detail</h5>
+                <button type="button" class="btn-close" aria-label="Close" @onclick="Close"></button>
+            </div>
+            <div class="modal-body d-flex flex-column gap-2 justify-content-center">
+                <p class="text-danger">@ErrorMessage</p>
+                <div class="form-group">
+                    <label class="form-label">Quiz Title</label>
+                    <InputText @bind-Value="Schedule.Quiz.Title" disabled="true" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Start Date</label>
+                    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="LocalStartDate" disabled="true" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">End Date</label>
+                    <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="LocalEndDate" disabled="true" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Score</label>
+                    <InputText @bind-Value="ScoreString" disabled="true" class="form-control"/>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show"></div>
+
+@code {
+
+    [Parameter] public Guid UserId { get; set; }
+    [Parameter] public Guid ScheduleId { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private DateTime LocalStartDate
+    {
+        get => Schedule.StartDate.ToLocalTime();
+        set => Schedule.StartDate = DateTime.SpecifyKind(value, DateTimeKind.Local).ToUniversalTime();
+    }
+
+    private DateTime LocalEndDate
+    {
+        get => Schedule.EndDate.ToLocalTime();
+        set => Schedule.EndDate = DateTime.SpecifyKind(value, DateTimeKind.Local).ToUniversalTime();
+    }
+
+    private string ScoreString
+    {
+        get => Score.ToString("F");
+        set => Score = float.Parse(ScoreString);
+    }
+
+    private float Score { get; set; }
+    private ScheduleDetailsDto Schedule { get; set; } = new();
+    private bool _isLoading = true;
+    private string ErrorMessage { get; set; } = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            var response = await UserScoreService.GetUserScore(new GetUserScoreDto
+            {
+                UserId = UserId,
+                ScheduleId = ScheduleId,
+            });
+
+            if (!response.IsSuccess)
+            {
+                ErrorMessage = response.Message;
+                _isLoading = false;
+                StateHasChanged();
+                return;
+            }
+
+            var content = response.Data!;
+            Score = content.Score;
+            Schedule = content.Schedule;
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void Close()
+    {
+        OnClose.InvokeAsync();
+    }
+
+}

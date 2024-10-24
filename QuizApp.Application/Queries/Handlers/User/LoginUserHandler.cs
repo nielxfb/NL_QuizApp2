@@ -42,9 +42,15 @@ public class LoginUserHandler : IQueryHandler<LoginUserQuery, UserDetailsDto>
                 Role = user.Role,
                 Token = token
             };
-        
-        if (_passwordHasher.VerifyHashedPassword(user, user.Password, query.Password) !=
-            PasswordVerificationResult.Success) throw new ArgumentException("Invalid initial or password.");
+        try
+        {
+            if (_passwordHasher.VerifyHashedPassword(user, user.Password, query.Password) !=
+                PasswordVerificationResult.Success) throw new ArgumentException("Invalid initial or password.");
+        }
+        catch (Exception _)
+        {
+            throw new ArgumentException("Invalid initial or password.");
+        }
 
         return new UserDetailsDto
         {

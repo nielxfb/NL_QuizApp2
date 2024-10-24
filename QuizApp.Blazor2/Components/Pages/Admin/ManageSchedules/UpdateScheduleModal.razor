@@ -1,4 +1,3 @@
-@using QuizApp.Application.DTOs.Schedule
 @inject QuizService QuizService
 
 @if (IsVisible)
@@ -55,13 +54,13 @@
     private DateTime LocalStartDate
     {
         get => Dto.StartDate.ToLocalTime();
-        set => Dto.StartDate = DateTime.SpecifyKind(value, DateTimeKind.Local).ToUniversalTime();  // Convert back to UTC
+        set => Dto.StartDate = DateTime.SpecifyKind(value, DateTimeKind.Local).ToUniversalTime(); 
     }
 
     private DateTime LocalEndDate
     {
         get => Dto.EndDate.ToLocalTime();
-        set => Dto.EndDate = DateTime.SpecifyKind(value, DateTimeKind.Local).ToUniversalTime();  // Convert back to UTC
+        set => Dto.EndDate = DateTime.SpecifyKind(value, DateTimeKind.Local).ToUniversalTime(); 
     }
 
 
