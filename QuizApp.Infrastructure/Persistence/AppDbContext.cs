@@ -54,7 +54,6 @@ public class AppDbContext : DbContext
             .HasMany(e => e.Schedules)
             .WithOne(e => e.Quiz)
             .HasForeignKey(e => e.QuizId)
-            .OnDelete(DeleteBehavior.NoAction)
             .IsRequired();
 
         modelBuilder.Entity<Response>()
@@ -92,9 +91,9 @@ public class AppDbContext : DbContext
             .IsRequired();
 
         modelBuilder.Entity<UserScore>()
-            .HasOne(e => e.Quiz)
+            .HasOne(e => e.Schedule)
             .WithMany(e => e.UserScores)
-            .HasForeignKey(e => e.QuizId)
+            .HasForeignKey(e => e.ScheduleId)
             .IsRequired();
 
         var userId = Guid.NewGuid();

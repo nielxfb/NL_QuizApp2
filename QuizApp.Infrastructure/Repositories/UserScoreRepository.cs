@@ -20,12 +20,12 @@ public class UserScoreRepository : IUserScoreRepository
         await _context.SaveChangesAsync();
     }
 
-    public Task<UserScore?> GetAsync(Guid userId, Guid quizId)
+    public Task<UserScore?> GetAsync(Guid userId, Guid scheduleId)
     {
         return _context.UserScores
             .Include(us => us.User)
-            .Include(us => us.Quiz)
-            .Where(us => us.UserId == userId && us.QuizId == quizId)
+            .Include(us => us.Schedule)
+            .Where(us => us.UserId == userId && us.ScheduleId == scheduleId)
             .FirstOrDefaultAsync();
     }
 }

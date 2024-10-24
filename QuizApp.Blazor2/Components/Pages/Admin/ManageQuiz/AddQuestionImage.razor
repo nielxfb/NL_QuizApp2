@@ -15,8 +15,8 @@
                         <label class="form-label">Upload Image Here</label>
                         <InputFile class="form-control" OnChange="HandleSelected"/>
                     </div>
+                    <p class="@(IsSuccess ? "text-success" : "text-danger")">@Message</p>
                 </div>
-                <p class="@(IsSuccess ? "text-success" : "text-danger")">@Message</p>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
                     <button type="button" class="btn btn-primary" @onclick="UploadImage" disabled="@_isUploadDisabled">Upload Image</button>
@@ -36,14 +36,12 @@
     private string Message { get; set; } = string.Empty;
     private bool IsSuccess { get; set; }
 
-    // Handle file selection
     private void HandleSelected(InputFileChangeEventArgs e)
     {
         _imageFile = e.File;
         _isUploadDisabled = _imageFile == null;
     }
 
-    // Upload image to API
     private async Task UploadImage()
     {
         if (_imageFile == null)
@@ -71,7 +69,6 @@
             }
             
             var message = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(message);
 
             var dto = await response.Content.ReadFromJsonAsync<FilePathDto>();
             var addImageUrlDto = new AddImageUrlDto

@@ -1,13 +1,8 @@
 @page "/TakeQuiz/{Id}"
-@using QuizApp.Application.DTOs.Response
-@using QuizApp.Application.DTOs.UserScore
-@using QuizApp.Domain.Entities
-@using QuizApp.Domain.Interfaces
 @layout NavbarLayout
 
 @inject HttpClient HttpClient
 @inject ScheduleService ScheduleService
-@inject QuizService QuizService
 @inject QuestionService QuestionService
 @inject UserScoreService UserScoreService
 @inject UserService UserService
@@ -126,7 +121,7 @@
         var scoreResponse = await UserScoreService.AddUserScoreAsync(new AddUserScoreDto
         {
             UserId = User.UserId,
-            QuizId = Schedule.Quiz.Id,
+            ScheduleId = Schedule.Id,
             QuestionCount = QuestionSelections.Count,
             SelectedOptions = selectedOptions,
         });

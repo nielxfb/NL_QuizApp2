@@ -35,11 +35,11 @@ public class UserScoreService
         try
         {
             var response = await _httpClient.PostAsJsonAsync("api/UserScore/add-score", addUserScoreDto);
-            var message = response.Content.ReadAsStringAsync();
+            var message = await response.Content.ReadAsStringAsync();
             return new Response<string>
             {
                 IsSuccess = response.IsSuccessStatusCode,
-                Message = await message,
+                Message = message,
             };
         }
         catch (Exception e)

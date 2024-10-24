@@ -11,4 +11,5 @@ public class Schedule
     public DateTime EndDate { get; set; }
     public ICollection<UserSchedule> UserSchedules { get; } = new List<UserSchedule>();
     public ICollection<Response> Responses { get; } = new List<Response>();
+    public ICollection<UserScore> UserScores { get; } = new List<UserScore>();
 }

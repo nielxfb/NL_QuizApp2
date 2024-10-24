@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace QuizApp.Infrastructure.Migrations
 {
     /// <inheritdoc />
@@ -74,31 +76,7 @@ namespace QuizApp.Infrastructure.Migrations
                         name: "FK_Schedules_Quizzes_QuizId",
                         column: x => x.QuizId,
                         principalTable: "Quizzes",
-                        principalColumn: "QuizId");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserScores",
-                columns: table => new
-                {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    QuizId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Score = table.Column<float>(type: "real", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserScores", x => new { x.UserId, x.QuizId });
-                    table.ForeignKey(
-                        name: "FK_UserScores_Quizzes_QuizId",
-                        column: x => x.QuizId,
-                        principalTable: "Quizzes",
                         principalColumn: "QuizId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserScores_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -149,6 +127,31 @@ namespace QuizApp.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserScores",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ScheduleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Score = table.Column<float>(type: "real", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserScores", x => new { x.UserId, x.ScheduleId });
+                    table.ForeignKey(
+                        name: "FK_UserScores_Schedules_ScheduleId",
+                        column: x => x.ScheduleId,
+                        principalTable: "Schedules",
+                        principalColumn: "ScheduleId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserScores_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Responses",
                 columns: table => new
                 {
@@ -185,6 +188,45 @@ namespace QuizApp.Infrastructure.Migrations
                         principalTable: "Users",
                         principalColumn: "UserId");
                 });
+
+            migrationBuilder.InsertData(
+                table: "Quizzes",
+                columns: new[] { "QuizId", "Title" },
+                values: new object[] { new Guid("98dc1ade-7d39-42dc-ab8b-ee9ecedd590c"), "Mock Quiz" });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "UserId", "FullName", "Initial", "Password", "Role" },
+                values: new object[,]
+                {
+                    { new Guid("3f2aa04d-319f-4476-9884-2376dffa5bba"), "Admin", "admin", "dummypassword", "Admin" },
+                    { new Guid("6dcadd85-1a13-44db-ac5e-935d37e27703"), "Daniel Adamlu", "NL23-2", "dummypassword", "User" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Questions",
+                columns: new[] { "QuestionId", "ImageUrl", "QuestionText", "QuizId" },
+                values: new object[] { new Guid("93bd883c-cd30-4aa1-8d22-ebe61f852cac"), null, "What is the capital of Indonesia?", new Guid("98dc1ade-7d39-42dc-ab8b-ee9ecedd590c") });
+
+            migrationBuilder.InsertData(
+                table: "Schedules",
+                columns: new[] { "ScheduleId", "EndDate", "QuizId", "StartDate" },
+                values: new object[] { new Guid("e8af45fb-b512-467f-b404-577cda511471"), new DateTime(2024, 10, 26, 0, 0, 0, 0, DateTimeKind.Local), new Guid("98dc1ade-7d39-42dc-ab8b-ee9ecedd590c"), new DateTime(2024, 10, 25, 0, 0, 0, 0, DateTimeKind.Local) });
+
+            migrationBuilder.InsertData(
+                table: "Options",
+                columns: new[] { "OptionChoice", "QuestionId", "ImageUrl", "IsCorrect", "OptionText" },
+                values: new object[,]
+                {
+                    { "A", new Guid("93bd883c-cd30-4aa1-8d22-ebe61f852cac"), "", false, "Medan" },
+                    { "B", new Guid("93bd883c-cd30-4aa1-8d22-ebe61f852cac"), "", false, "Bandung" },
+                    { "C", new Guid("93bd883c-cd30-4aa1-8d22-ebe61f852cac"), "", true, "Jakarta" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "UserSchedules",
+                columns: new[] { "ScheduleId", "UserId", "Status" },
+                values: new object[] { new Guid("e8af45fb-b512-467f-b404-577cda511471"), new Guid("6dcadd85-1a13-44db-ac5e-935d37e27703"), "Incomplete" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Questions_QuizId",
@@ -223,9 +265,9 @@ namespace QuizApp.Infrastructure.Migrations
                 column: "ScheduleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserScores_QuizId",
+                name: "IX_UserScores_ScheduleId",
                 table: "UserScores",
-                column: "QuizId");
+                column: "ScheduleId");
         }
 
         /// <inheritdoc />

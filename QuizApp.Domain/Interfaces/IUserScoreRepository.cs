@@ -5,5 +5,5 @@ namespace QuizApp.Domain.Interfaces;
 public interface IUserScoreRepository
 {
     Task AddAsync(UserScore userScore);
-    Task<UserScore?> GetAsync(Guid userId, Guid quizId);
+    Task<UserScore?> GetAsync(Guid userId, Guid scheduleId);
 }

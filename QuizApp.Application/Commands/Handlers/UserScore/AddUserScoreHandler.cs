@@ -8,13 +8,13 @@ public class AddUserScoreHandler : ICommandHandler<AddUserScoreCommand>
 {
     private readonly IUserScoreRepository _repository;
     private readonly IUserRepository _userRepository;
-    private readonly IQuizRepository _quizRepository;
+    private readonly IScheduleRepository _scheduleRepository;
 
-    public AddUserScoreHandler(IUserScoreRepository repository, IUserRepository userRepository, IQuizRepository quizRepository)
+    public AddUserScoreHandler(IUserScoreRepository repository, IUserRepository userRepository, IScheduleRepository scheduleRepository)
     {
         _repository = repository;
         _userRepository = userRepository;
-        _quizRepository = quizRepository;
+        _scheduleRepository = scheduleRepository;
     }
 
     public async Task HandleAsync(AddUserScoreCommand command)
@@ -23,9 +23,9 @@ public class AddUserScoreHandler : ICommandHandler<AddUserScoreCommand>
         if (user == null)
             throw new ArgumentException("User not found.");
 
-        var quiz = await _quizRepository.GetByIdAsync(command.QuizId);
-        if (quiz == null)
-            throw new ArgumentException("Quiz not found.");
+        var schedule = await _scheduleRepository.GetByIdAsync(command.ScheduleId);
+        if (schedule == null)
+            throw new ArgumentException("Schedule not found.");
 
         var correctAnswers = 0;
         foreach (var option in command.SelectedOptions)
@@ -37,7 +37,7 @@ public class AddUserScoreHandler : ICommandHandler<AddUserScoreCommand>
         var userScore = new Domain.Entities.UserScore
         {
             UserId = command.UserId,
-            QuizId = command.QuizId,
+            ScheduleId = command.ScheduleId,
             Score = (float) correctAnswers / command.QuestionCount,
         };
 

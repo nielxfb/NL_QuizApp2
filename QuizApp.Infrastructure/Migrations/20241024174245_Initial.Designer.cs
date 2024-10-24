@@ -12,7 +12,7 @@ using QuizApp.Infrastructure.Persistence;
 namespace QuizApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241024164836_Initial")]
+    [Migration("20241024174245_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -49,6 +49,32 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasKey("QuestionId", "OptionChoice");
 
                     b.ToTable("Options");
+
+                    b.HasData(
+                        new
+                        {
+                            QuestionId = new Guid("93bd883c-cd30-4aa1-8d22-ebe61f852cac"),
+                            OptionChoice = "A",
+                            ImageUrl = "",
+                            IsCorrect = false,
+                            OptionText = "Medan"
+                        },
+                        new
+                        {
+                            QuestionId = new Guid("93bd883c-cd30-4aa1-8d22-ebe61f852cac"),
+                            OptionChoice = "B",
+                            ImageUrl = "",
+                            IsCorrect = false,
+                            OptionText = "Bandung"
+                        },
+                        new
+                        {
+                            QuestionId = new Guid("93bd883c-cd30-4aa1-8d22-ebe61f852cac"),
+                            OptionChoice = "C",
+                            ImageUrl = "",
+                            IsCorrect = true,
+                            OptionText = "Jakarta"
+                        });
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Question", b =>
@@ -76,6 +102,14 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasIndex("QuizId");
 
                     b.ToTable("Questions");
+
+                    b.HasData(
+                        new
+                        {
+                            QuestionId = new Guid("93bd883c-cd30-4aa1-8d22-ebe61f852cac"),
+                            QuestionText = "What is the capital of Indonesia?",
+                            QuizId = new Guid("98dc1ade-7d39-42dc-ab8b-ee9ecedd590c")
+                        });
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Quiz", b =>
@@ -93,6 +127,13 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasKey("QuizId");
 
                     b.ToTable("Quizzes");
+
+                    b.HasData(
+                        new
+                        {
+                            QuizId = new Guid("98dc1ade-7d39-42dc-ab8b-ee9ecedd590c"),
+                            Title = "Mock Quiz"
+                        });
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Response", b =>
@@ -160,6 +201,15 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasIndex("QuizId");
 
                     b.ToTable("Schedules");
+
+                    b.HasData(
+                        new
+                        {
+                            ScheduleId = new Guid("e8af45fb-b512-467f-b404-577cda511471"),
+                            EndDate = new DateTime(2024, 10, 26, 0, 0, 0, 0, DateTimeKind.Local),
+                            QuizId = new Guid("98dc1ade-7d39-42dc-ab8b-ee9ecedd590c"),
+                            StartDate = new DateTime(2024, 10, 25, 0, 0, 0, 0, DateTimeKind.Local)
+                        });
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.User", b =>
@@ -192,6 +242,24 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = new Guid("3f2aa04d-319f-4476-9884-2376dffa5bba"),
+                            FullName = "Admin",
+                            Initial = "admin",
+                            Password = "dummypassword",
+                            Role = "Admin"
+                        },
+                        new
+                        {
+                            UserId = new Guid("6dcadd85-1a13-44db-ac5e-935d37e27703"),
+                            FullName = "Daniel Adamlu",
+                            Initial = "NL23-2",
+                            Password = "dummypassword",
+                            Role = "User"
+                        });
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.UserSchedule", b =>
@@ -214,6 +282,14 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasIndex("ScheduleId");
 
                     b.ToTable("UserSchedules");
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = new Guid("6dcadd85-1a13-44db-ac5e-935d37e27703"),
+                            ScheduleId = new Guid("e8af45fb-b512-467f-b404-577cda511471"),
+                            Status = "Incomplete"
+                        });
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.UserScore", b =>
@@ -221,15 +297,15 @@ namespace QuizApp.Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("QuizId")
+                    b.Property<Guid>("ScheduleId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<float>("Score")
                         .HasColumnType("real");
 
-                    b.HasKey("UserId", "QuizId");
+                    b.HasKey("UserId", "ScheduleId");
 
-                    b.HasIndex("QuizId");
+                    b.HasIndex("ScheduleId");
 
                     b.ToTable("UserScores");
                 });
@@ -296,7 +372,7 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasOne("QuizApp.Domain.Entities.Quiz", "Quiz")
                         .WithMany("Schedules")
                         .HasForeignKey("QuizId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Quiz");
@@ -323,9 +399,9 @@ namespace QuizApp.Infrastructure.Migrations
 
             modelBuilder.Entity("QuizApp.Domain.Entities.UserScore", b =>
                 {
-                    b.HasOne("QuizApp.Domain.Entities.Quiz", "Quiz")
+                    b.HasOne("QuizApp.Domain.Entities.Schedule", "Schedule")
                         .WithMany("UserScores")
-                        .HasForeignKey("QuizId")
+                        .HasForeignKey("ScheduleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -335,7 +411,7 @@ namespace QuizApp.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Quiz");
+                    b.Navigation("Schedule");
 
                     b.Navigation("User");
                 });
@@ -357,8 +433,6 @@ namespace QuizApp.Infrastructure.Migrations
                     b.Navigation("Questions");
 
                     b.Navigation("Schedules");
-
-                    b.Navigation("UserScores");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Schedule", b =>
@@ -366,6 +440,8 @@ namespace QuizApp.Infrastructure.Migrations
                     b.Navigation("Responses");
 
                     b.Navigation("UserSchedules");
+
+                    b.Navigation("UserScores");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.User", b =>

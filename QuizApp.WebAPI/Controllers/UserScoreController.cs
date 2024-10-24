@@ -21,9 +21,9 @@ namespace QuizApp.WebAPI.Controllers
         [Authorize]
         public async Task<IActionResult> AddUserScore([FromBody] AddUserScoreDto dto)
         {
-            if (dto.UserId == Guid.Empty || dto.QuizId == Guid.Empty)
+            if (dto.UserId == Guid.Empty || dto.ScheduleId == Guid.Empty)
             {
-                return BadRequest("User ID and Quiz ID are required.");
+                return BadRequest("User ID and Schedule ID are required.");
             }
 
             if (dto.QuestionCount == 0)
