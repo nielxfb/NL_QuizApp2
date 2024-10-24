@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using QuizApp.Application.Commands.Question;
 using QuizApp.Application.DTOs.Question;
 using QuizApp.Application.Interfaces.Handlers;
@@ -21,14 +22,20 @@ public class QuestionController : ControllerBase
     private readonly ICommandHandler<UpdateQuestionCommand> _updateQuestionHandler;
     private readonly ICommandHandler<AddImageUrlCommand> _addImageUrlHandler;
     private readonly IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>> _getQuestionsInQuizHandler;
+    private readonly IMemoryCache _memoryCache;
 
-    public QuestionController(ICommandHandler<AddQuestionCommand> addCommandHandler, ICommandHandler<RemoveQuestionCommand> removeQuestionHandler, ICommandHandler<UpdateQuestionCommand> updateQuestionHandler, ICommandHandler<AddImageUrlCommand> addImageUrlHandler, IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>> getQuestionsInQuizHandler)
+    public QuestionController(ICommandHandler<AddQuestionCommand> addCommandHandler,
+        ICommandHandler<RemoveQuestionCommand> removeQuestionHandler,
+        ICommandHandler<UpdateQuestionCommand> updateQuestionHandler,
+        ICommandHandler<AddImageUrlCommand> addImageUrlHandler,
+        IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>> getQuestionsInQuizHandler, IMemoryCache memoryCache)
     {
         _addCommandHandler = addCommandHandler;
         _removeQuestionHandler = removeQuestionHandler;
         _updateQuestionHandler = updateQuestionHandler;
         _addImageUrlHandler = addImageUrlHandler;
         _getQuestionsInQuizHandler = getQuestionsInQuizHandler;
+        _memoryCache = memoryCache;
     }
 
     [HttpPost("add-question")]
@@ -56,7 +63,11 @@ public class QuestionController : ControllerBase
 
         try
         {
-            var questions = await _getQuestionsInQuizHandler.HandleAsync(new GetQuestionsInQuizQuery(quizId));
+            if (_memoryCache.TryGetValue(quizId, out List<QuestionDto>? questions))
+                return Ok(questions);
+
+            questions = await _getQuestionsInQuizHandler.HandleAsync(new GetQuestionsInQuizQuery(quizId));
+            _memoryCache.Set(quizId, questions, TimeSpan.FromMinutes(10));
             return Ok(questions);
         }
         catch (Exception e)
@@ -98,7 +109,7 @@ public class QuestionController : ControllerBase
             return BadRequest(e.Message);
         }
     }
-    
+
     [HttpPost("add-image-url")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AddImageUrl([FromBody] AddImageUrlDto dto)

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using QuizApp.Application.Commands.Schedule;
 using QuizApp.Application.DTOs.Schedule;
 using QuizApp.Application.Interfaces.Handlers;
@@ -22,18 +23,17 @@ public class ScheduleController : ControllerBase
     private readonly ICommandHandler<AddScheduleCommand> _addScheduleHandler;
     private readonly ICommandHandler<UpdateScheduleCommand> _updateScheduleHandler;
     private readonly ICommandHandler<RemoveScheduleCommand> _removeScheduleHandler;
+    
+    private readonly IMemoryCache _memoryCache;
 
-    public ScheduleController(IQueryHandler<GetSchedulesQuery, List<ScheduleDetailsDto>> getSchedulesHandler,
-        IQueryHandler<GetScheduleByIdQuery, ScheduleDetailsDto> getScheduleByIdHandler,
-        ICommandHandler<AddScheduleCommand> addScheduleHandler,
-        ICommandHandler<UpdateScheduleCommand> updateScheduleHandler,
-        ICommandHandler<RemoveScheduleCommand> removeScheduleHandler)
+    public ScheduleController(IQueryHandler<GetSchedulesQuery, List<ScheduleDetailsDto>> getSchedulesHandler, IQueryHandler<GetScheduleByIdQuery, ScheduleDetailsDto> getScheduleByIdHandler, ICommandHandler<AddScheduleCommand> addScheduleHandler, ICommandHandler<UpdateScheduleCommand> updateScheduleHandler, ICommandHandler<RemoveScheduleCommand> removeScheduleHandler, IMemoryCache memoryCache)
     {
         _getSchedulesHandler = getSchedulesHandler;
         _getScheduleByIdHandler = getScheduleByIdHandler;
         _addScheduleHandler = addScheduleHandler;
         _updateScheduleHandler = updateScheduleHandler;
         _removeScheduleHandler = removeScheduleHandler;
+        _memoryCache = memoryCache;
     }
 
     [HttpGet("get-all-schedules")]
@@ -42,7 +42,11 @@ public class ScheduleController : ControllerBase
     {
         try
         {
-            var schedules = await _getSchedulesHandler.HandleAsync(new GetSchedulesQuery());
+            if (_memoryCache.TryGetValue("schedules", out List<ScheduleDetailsDto>? schedules))
+                return Ok(schedules);
+                
+            schedules = await _getSchedulesHandler.HandleAsync(new GetSchedulesQuery());
+            _memoryCache.Set("schedules", schedules, TimeSpan.FromMinutes(5));
             return Ok(schedules);
         }
         catch (Exception ex)

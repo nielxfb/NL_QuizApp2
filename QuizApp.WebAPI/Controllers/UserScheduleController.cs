@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using QuizApp.Application.Commands.UserSchedule;
 using QuizApp.Application.DTOs.UserSchedule;
 using QuizApp.Application.Interfaces.Handlers;
@@ -19,14 +20,16 @@ public class UserScheduleController : ControllerBase
     private readonly ICommandHandler<UpdateStatusCommand> _updateStatusHandler;
     private readonly IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> _getUsersInScheduleHandler;
     private readonly IQueryHandler<GetUserSchedulesQuery, List<UserSchedulesDto>> _getUserSchedulesHandler;
+    private readonly IMemoryCache _memoryCache;
 
-    public UserScheduleController(ICommandHandler<AddUserToScheduleCommand> addUserToScheduleHandler, ICommandHandler<RemoveUserFromScheduleCommand> removeUserFromScheduleHandler, ICommandHandler<UpdateStatusCommand> updateStatusHandler, IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> getUsersInScheduleHandler, IQueryHandler<GetUserSchedulesQuery, List<UserSchedulesDto>> getUserSchedulesHandler)
+    public UserScheduleController(ICommandHandler<AddUserToScheduleCommand> addUserToScheduleHandler, ICommandHandler<RemoveUserFromScheduleCommand> removeUserFromScheduleHandler, ICommandHandler<UpdateStatusCommand> updateStatusHandler, IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> getUsersInScheduleHandler, IQueryHandler<GetUserSchedulesQuery, List<UserSchedulesDto>> getUserSchedulesHandler, IMemoryCache memoryCache)
     {
         _addUserToScheduleHandler = addUserToScheduleHandler;
         _removeUserFromScheduleHandler = removeUserFromScheduleHandler;
         _updateStatusHandler = updateStatusHandler;
         _getUsersInScheduleHandler = getUsersInScheduleHandler;
         _getUserSchedulesHandler = getUserSchedulesHandler;
+        _memoryCache = memoryCache;
     }
 
     [HttpGet("get-users-in-schedule")]
@@ -48,9 +51,15 @@ public class UserScheduleController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetUserSchedules([FromQuery] GetUserSchedulesDto dto)
     {
+        if (dto.UserId == Guid.Empty) return BadRequest("Invalid user id.");
+        
         try
         {
-            var userSchedules = await _getUserSchedulesHandler.HandleAsync(new GetUserSchedulesQuery(dto));
+            if (_memoryCache.TryGetValue(dto.UserId, out List<UserSchedulesDto>? userSchedules))
+                return Ok(userSchedules);
+            
+            userSchedules = await _getUserSchedulesHandler.HandleAsync(new GetUserSchedulesQuery(dto));
+            _memoryCache.Set(dto.UserId, userSchedules, TimeSpan.FromMinutes(5));
             return Ok(userSchedules);
         }
         catch (Exception ex)

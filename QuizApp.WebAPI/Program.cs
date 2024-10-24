@@ -112,6 +112,8 @@ builder.Services.AddSingleton<JwtTokenService>(provider =>
     return new JwtTokenService(secret!, issuer!, audience!);
 });
 
+builder.Services.AddMemoryCache();
+
 builder.Services.Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMQ"));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
