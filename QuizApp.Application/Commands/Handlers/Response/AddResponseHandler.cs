@@ -32,18 +32,30 @@ public class AddResponseHandler : ICommandHandler<AddResponseCommand>
         if (option == null) throw new ArgumentException("Option not found.");
 
         var isCorrect = option.IsCorrect;
-
-        var response = new Domain.Entities.Response
+            
+        var existingResponse = await _repository.GetExistingResponse(command.UserId, command.QuestionId);
+        if (existingResponse == null)
         {
-            ResponseId = Guid.NewGuid(),
-            QuizId = command.QuizId,
-            UserId = command.UserId,
-            QuestionId = command.QuestionId,
-            OptionChoice = command.OptionChoice,
-            IsCorrect = isCorrect,
-            AnsweredAt = command.AnsweredAt
-        };
+            var response = new Domain.Entities.Response
+            {
+                ResponseId = Guid.NewGuid(),
+                QuizId = command.QuizId,
+                UserId = command.UserId,
+                QuestionId = command.QuestionId,
+                OptionChoice = command.OptionChoice,
+                IsCorrect = isCorrect,
+                AnsweredAt = command.AnsweredAt
+            };
 
-        await _repository.AddAsync(response);
+            await _repository.AddAsync(response);
+        }
+        else
+        {
+            existingResponse.OptionChoice = command.OptionChoice;
+            existingResponse.AnsweredAt = command.AnsweredAt;
+            existingResponse.IsCorrect = isCorrect;
+
+            await _repository.UpdateAsync(existingResponse);
+        }
     }
 }

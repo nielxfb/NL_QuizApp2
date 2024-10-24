@@ -40,4 +40,11 @@ public class ResponseRepository : IResponseRepository
         return _context.Responses
             .FirstOrDefaultAsync(r => r.ResponseId == responseId);
     }
+
+    public Task<Response?> GetExistingResponse(Guid userId, Guid questionId)
+    {
+        return _context.Responses
+            .Where(r => r.UserId == userId && r.QuestionId == questionId)
+            .FirstOrDefaultAsync();
+    }
 }

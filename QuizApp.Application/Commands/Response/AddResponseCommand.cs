@@ -16,6 +16,6 @@ public class AddResponseCommand
         UserId = dto.UserId;
         QuestionId = dto.QuestionId;
         OptionChoice = dto.OptionChoice[0];
-        AnsweredAt = DateTime.Now;
+        AnsweredAt = DateTime.Now.ToUniversalTime();
     }
 }

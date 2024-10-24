@@ -107,6 +107,8 @@ builder.Services.AddSingleton<JwtTokenService>(provider =>
     return new JwtTokenService(secret!, issuer!, audience!);
 });
 
+builder.Services.Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMQ"));
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IQuizRepository, QuizRepository>();
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
@@ -151,6 +153,7 @@ builder.Services.AddScoped<IQueryHandler<GetUserResponsesInQuizQuery, ResponseDt
 
 builder.Services.AddSignalR();
 builder.Services.AddHostedService<TimeBroadcastService>();
+builder.Services.AddHostedService<ResponsesConsumerService>();
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {

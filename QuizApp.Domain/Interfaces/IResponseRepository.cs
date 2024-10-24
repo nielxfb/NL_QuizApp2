@@ -8,4 +8,5 @@ public interface IResponseRepository
     Task UpdateAsync(Response response);
     Task<List<Response>> GetUserResponsesInQuizAsync(Guid userId, Guid quizId);
     Task<Response?> GetByIdAsync(Guid responseId);
+    Task<Response?> GetExistingResponse(Guid userId, Guid questionId);
 }
