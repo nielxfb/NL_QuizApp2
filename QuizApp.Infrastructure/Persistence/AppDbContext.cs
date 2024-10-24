@@ -97,6 +97,95 @@ public class AppDbContext : DbContext
             .HasForeignKey(e => e.QuizId)
             .IsRequired();
 
+        var userId = Guid.NewGuid();
+        modelBuilder.Entity<User>()
+            .HasData(
+                new User
+                {
+                    UserId = Guid.NewGuid(),
+                    FullName = "Admin",
+                    Role = "Admin",
+                    Initial = "admin",
+                    Password = "dummypassword",
+                },
+                new User
+                {
+                    UserId = userId,
+                    FullName = "Daniel Adamlu",
+                    Role = "User",
+                    Initial = "NL23-2",
+                    Password = "dummypassword",
+                });
+
+
+        var quizId = Guid.NewGuid();
+        modelBuilder.Entity<Quiz>()
+            .HasData(
+                new Quiz
+                {
+                    QuizId = quizId,
+                    Title = "Mock Quiz",
+                }
+            );
+
+        var questionId = Guid.NewGuid();
+        modelBuilder.Entity<Question>()
+            .HasData(
+                new Question
+                {
+                    QuizId = quizId,
+                    QuestionId = questionId,
+                    QuestionText = "What is the capital of Indonesia?",
+                }
+            );
+
+        modelBuilder.Entity<Option>()
+            .HasData(
+                new Option
+                {
+                    QuestionId = questionId,
+                    OptionChoice = 'A',
+                    OptionText = "Medan",
+                    IsCorrect = false,
+                },
+                new Option
+                {
+                    QuestionId = questionId,
+                    OptionChoice = 'B',
+                    OptionText = "Bandung",
+                    IsCorrect = false,
+                },
+                new Option
+                {
+                    QuestionId = questionId,
+                    OptionChoice = 'C',
+                    OptionText = "Jakarta",
+                    IsCorrect = true,
+                }
+            );
+
+        var scheduleId = Guid.NewGuid();
+        modelBuilder.Entity<Schedule>()
+            .HasData(
+                new Schedule
+                {
+                    ScheduleId = scheduleId,
+                    QuizId = quizId,
+                    StartDate = DateTime.Today,
+                    EndDate = DateTime.Today.AddDays(1),
+                }
+            );
+
+        modelBuilder.Entity<UserSchedule>()
+            .HasData(
+                new UserSchedule
+                {
+                    UserId = userId,
+                    ScheduleId = scheduleId,
+                    Status = "Incomplete",
+                }
+            );
+
         base.OnModelCreating(modelBuilder);
     }
 }

@@ -46,6 +46,32 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasKey("QuestionId", "OptionChoice");
 
                     b.ToTable("Options");
+
+                    b.HasData(
+                        new
+                        {
+                            QuestionId = new Guid("bb75dce2-bfae-4f84-b24a-4c3ecbdb5c1c"),
+                            OptionChoice = "A",
+                            ImageUrl = "",
+                            IsCorrect = false,
+                            OptionText = "Medan"
+                        },
+                        new
+                        {
+                            QuestionId = new Guid("bb75dce2-bfae-4f84-b24a-4c3ecbdb5c1c"),
+                            OptionChoice = "B",
+                            ImageUrl = "",
+                            IsCorrect = false,
+                            OptionText = "Bandung"
+                        },
+                        new
+                        {
+                            QuestionId = new Guid("bb75dce2-bfae-4f84-b24a-4c3ecbdb5c1c"),
+                            OptionChoice = "C",
+                            ImageUrl = "",
+                            IsCorrect = true,
+                            OptionText = "Jakarta"
+                        });
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Question", b =>
@@ -73,6 +99,14 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasIndex("QuizId");
 
                     b.ToTable("Questions");
+
+                    b.HasData(
+                        new
+                        {
+                            QuestionId = new Guid("bb75dce2-bfae-4f84-b24a-4c3ecbdb5c1c"),
+                            QuestionText = "What is the capital of Indonesia?",
+                            QuizId = new Guid("03239d06-f552-4108-b578-ac532d7a2453")
+                        });
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Quiz", b =>
@@ -90,6 +124,13 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasKey("QuizId");
 
                     b.ToTable("Quizzes");
+
+                    b.HasData(
+                        new
+                        {
+                            QuizId = new Guid("03239d06-f552-4108-b578-ac532d7a2453"),
+                            Title = "Mock Quiz"
+                        });
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Response", b =>
@@ -157,6 +198,15 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasIndex("QuizId");
 
                     b.ToTable("Schedules");
+
+                    b.HasData(
+                        new
+                        {
+                            ScheduleId = new Guid("8f672633-6556-4c8e-b48e-09853fc9ad7e"),
+                            EndDate = new DateTime(2024, 10, 26, 0, 0, 0, 0, DateTimeKind.Local),
+                            QuizId = new Guid("03239d06-f552-4108-b578-ac532d7a2453"),
+                            StartDate = new DateTime(2024, 10, 25, 0, 0, 0, 0, DateTimeKind.Local)
+                        });
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.User", b =>
@@ -189,6 +239,24 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = new Guid("4dfd4467-8c09-48a8-bc1c-12c44903a128"),
+                            FullName = "Admin",
+                            Initial = "admin",
+                            Password = "dummypassword",
+                            Role = "Admin"
+                        },
+                        new
+                        {
+                            UserId = new Guid("56c5278c-cb5f-43d0-9aea-9a8aed27e7e2"),
+                            FullName = "Daniel Adamlu",
+                            Initial = "NL23-2",
+                            Password = "dummypassword",
+                            Role = "User"
+                        });
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.UserSchedule", b =>
@@ -211,6 +279,14 @@ namespace QuizApp.Infrastructure.Migrations
                     b.HasIndex("ScheduleId");
 
                     b.ToTable("UserSchedules");
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = new Guid("56c5278c-cb5f-43d0-9aea-9a8aed27e7e2"),
+                            ScheduleId = new Guid("8f672633-6556-4c8e-b48e-09853fc9ad7e"),
+                            Status = "Incomplete"
+                        });
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.UserScore", b =>
