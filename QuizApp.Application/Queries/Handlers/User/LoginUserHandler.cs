@@ -24,7 +24,7 @@ public class LoginUserHandler : IQueryHandler<LoginUserQuery, UserDetailsDto>
 
     public async Task<UserDetailsDto> HandleAsync(LoginUserQuery query)
     {
-        if (!Regex.IsMatch(query.Initial, "^[A-Za-z]{2}[0-9][0-9]-[0-2]"))
+        if (query.Initial != "admin" && !Regex.IsMatch(query.Initial, "^[A-Za-z]{2}[0-9][0-9]-[0-2]"))
             throw new ArgumentException("Invalid initial format.");
 
         var user = await _userRepository.GetByInitialAsync(query.Initial);
