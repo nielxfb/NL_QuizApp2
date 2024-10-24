@@ -101,7 +101,7 @@
             QuizId = quizId
         };
 
-        await Publisher.PublishMessageAsync(dto, "responses-queue");
+        await Publisher.PublishMessageAsync(dto);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
