@@ -31,7 +31,14 @@
             <td>@schedule.EndDate.ToLocalTime()</td>
             <td>@schedule.Status</td>
             <td>
-                <button class="btn btn-success" @onclick="() => TakeQuiz(schedule.ScheduleId)">Take Quiz</button>
+                @if (schedule.Status == "Completed")
+                {
+                    <button class="btn btn-primary">Show Detail</button>
+                }
+                else
+                {
+                    <button class="btn btn-success" @onclick="() => TakeQuiz(schedule.ScheduleId)">Take Quiz</button>
+                }
             </td>
         </tr>
     }
@@ -46,21 +53,55 @@
     private string ErrorMessage { get; set; } = string.Empty;
     private bool _isLoading;
 
-    private void TakeQuiz(Guid scheduleId)
+    private async Task TakeQuiz(Guid scheduleId)
     {
+        _isLoading = true;
+        StateHasChanged();
+
         if (DateTime.UtcNow < UserSchedules.First(s => s.ScheduleId == scheduleId).StartDate)
         {
             ErrorMessage = "The quiz has not started yet.";
             return;
         }
-        
+
         if (DateTime.UtcNow > UserSchedules.First(s => s.ScheduleId == scheduleId).EndDate)
         {
             ErrorMessage = "The quiz has ended.";
             return;
         }
-        
-        
+
+        if (UserSchedules.First(s => s.ScheduleId == scheduleId).Status == "Completed")
+        {
+            ErrorMessage = "Quiz has been completed.";
+            return;
+        }
+
+        var userResponse = await UserService.GetUserDetails();
+        if (!userResponse.IsSuccess)
+        {
+            ErrorMessage = userResponse.Message;
+            _isLoading = false;
+            StateHasChanged();
+            return;
+        }
+
+        var user = userResponse.Data!;
+
+        var updateResponse = await UserScheduleService.UpdateStatus(new UpdateStatusDto
+        {
+            UserId = user.UserId,
+            ScheduleId = scheduleId,
+            Status = "In Progress"
+        });
+
+        if (!updateResponse.IsSuccess)
+        {
+            ErrorMessage = updateResponse.Message;
+            _isLoading = false;
+            StateHasChanged();
+            return;
+        }
+
         Nav.NavigateTo($"/TakeQuiz/{scheduleId}");
     }
 

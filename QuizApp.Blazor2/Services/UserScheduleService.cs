@@ -195,4 +195,39 @@ public class UserScheduleService
             };
         }
     }
+
+    public async Task<Response<string>> UpdateStatus(UpdateStatusDto dto)
+    {
+        var cookie = await _cookie.GetValue("user_cookie");
+
+        if (cookie == "")
+        {
+            return new Response<string>
+            {
+                IsSuccess = false,
+                Message = "You are not authorized to perform this action",
+            };
+        }
+
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cookie);
+
+        try
+        {
+            var response = await _httpClient.PutAsJsonAsync("api/UserSchedule/update-status", dto);
+            var message = await response.Content.ReadAsStringAsync();
+            return new Response<string>
+            {
+                IsSuccess = response.IsSuccessStatusCode,
+                Message = message,
+            };
+        }
+        catch (Exception e)
+        {
+            return new Response<string>
+            {
+                IsSuccess = false,
+                Message = $"An error occured {e.Message}",
+            };
+        }
+    }
 }

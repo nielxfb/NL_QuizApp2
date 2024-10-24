@@ -16,13 +16,15 @@ public class UserScheduleController : ControllerBase
 {
     private readonly ICommandHandler<AddUserToScheduleCommand> _addUserToScheduleHandler;
     private readonly ICommandHandler<RemoveUserFromScheduleCommand> _removeUserFromScheduleHandler;
+    private readonly ICommandHandler<UpdateStatusCommand> _updateStatusHandler;
     private readonly IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> _getUsersInScheduleHandler;
     private readonly IQueryHandler<GetUserSchedulesQuery, List<UserSchedulesDto>> _getUserSchedulesHandler;
 
-    public UserScheduleController(ICommandHandler<AddUserToScheduleCommand> addUserToScheduleHandler, ICommandHandler<RemoveUserFromScheduleCommand> removeUserFromScheduleHandler, IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> getUsersInScheduleHandler, IQueryHandler<GetUserSchedulesQuery, List<UserSchedulesDto>> getUserSchedulesHandler)
+    public UserScheduleController(ICommandHandler<AddUserToScheduleCommand> addUserToScheduleHandler, ICommandHandler<RemoveUserFromScheduleCommand> removeUserFromScheduleHandler, ICommandHandler<UpdateStatusCommand> updateStatusHandler, IQueryHandler<GetUsersInScheduleQuery, UsersInScheduleDto> getUsersInScheduleHandler, IQueryHandler<GetUserSchedulesQuery, List<UserSchedulesDto>> getUserSchedulesHandler)
     {
         _addUserToScheduleHandler = addUserToScheduleHandler;
         _removeUserFromScheduleHandler = removeUserFromScheduleHandler;
+        _updateStatusHandler = updateStatusHandler;
         _getUsersInScheduleHandler = getUsersInScheduleHandler;
         _getUserSchedulesHandler = getUserSchedulesHandler;
     }
@@ -84,6 +86,23 @@ public class UserScheduleController : ControllerBase
         {
             await _removeUserFromScheduleHandler.HandleAsync(new RemoveUserFromScheduleCommand(dto));
             return Ok("Successfully removed user from schedule.");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    
+    [HttpPut("update-status")]
+    [Authorize]
+    public async Task<IActionResult> UpdateStatus([FromBody] UpdateStatusDto dto)
+    {
+        if (dto.UserId == Guid.Empty || dto.ScheduleId == Guid.Empty) return BadRequest("Invalid user or schedule id.");
+
+        try
+        {
+            await _updateStatusHandler.HandleAsync(new UpdateStatusCommand(dto));
+            return Ok("Successfully updated user schedule status.");
         }
         catch (Exception ex)
         {
