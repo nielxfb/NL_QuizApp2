@@ -21,8 +21,6 @@ public class AddScheduleHandler : ICommandHandler<AddScheduleCommand>
         var quiz = await _quizRepository.GetByIdAsync(command.QuizId);
         if (quiz == null) throw new ArgumentException("Quiz not found.");
 
-        if (command.StartDate < DateTime.UtcNow) throw new ArgumentException("Start date must be in the future.");
-
         if (command.StartDate >= command.EndDate) throw new ArgumentException("Start date must be before end date.");
 
         var schedule = new Domain.Entities.Schedule
