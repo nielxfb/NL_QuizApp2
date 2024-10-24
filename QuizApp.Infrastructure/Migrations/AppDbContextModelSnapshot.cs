@@ -45,7 +45,7 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasKey("QuestionId", "OptionChoice");
 
-                    b.ToTable("Options", (string)null);
+                    b.ToTable("Options");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Question", b =>
@@ -72,7 +72,7 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasIndex("QuizId");
 
-                    b.ToTable("Questions", (string)null);
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Quiz", b =>
@@ -89,7 +89,7 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasKey("QuizId");
 
-                    b.ToTable("Quizzes", (string)null);
+                    b.ToTable("Quizzes");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Response", b =>
@@ -132,7 +132,7 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasIndex("QuestionId", "OptionChoice");
 
-                    b.ToTable("Responses", (string)null);
+                    b.ToTable("Responses");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Schedule", b =>
@@ -156,7 +156,7 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasIndex("QuizId");
 
-                    b.ToTable("Schedules", (string)null);
+                    b.ToTable("Schedules");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.User", b =>
@@ -188,7 +188,7 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.UserSchedule", b =>
@@ -210,7 +210,25 @@ namespace QuizApp.Infrastructure.Migrations
 
                     b.HasIndex("ScheduleId");
 
-                    b.ToTable("UserSchedules", (string)null);
+                    b.ToTable("UserSchedules");
+                });
+
+            modelBuilder.Entity("QuizApp.Domain.Entities.UserScore", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("QuizId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<float>("Score")
+                        .HasColumnType("real");
+
+                    b.HasKey("UserId", "QuizId");
+
+                    b.HasIndex("QuizId");
+
+                    b.ToTable("UserScores");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Option", b =>
@@ -300,6 +318,25 @@ namespace QuizApp.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("QuizApp.Domain.Entities.UserScore", b =>
+                {
+                    b.HasOne("QuizApp.Domain.Entities.Quiz", "Quiz")
+                        .WithMany("UserScores")
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QuizApp.Domain.Entities.User", "User")
+                        .WithMany("Scores")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quiz");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("QuizApp.Domain.Entities.Option", b =>
                 {
                     b.Navigation("Responses");
@@ -319,6 +356,8 @@ namespace QuizApp.Infrastructure.Migrations
                     b.Navigation("Responses");
 
                     b.Navigation("Schedules");
+
+                    b.Navigation("UserScores");
                 });
 
             modelBuilder.Entity("QuizApp.Domain.Entities.Schedule", b =>
@@ -329,6 +368,8 @@ namespace QuizApp.Infrastructure.Migrations
             modelBuilder.Entity("QuizApp.Domain.Entities.User", b =>
                 {
                     b.Navigation("Responses");
+
+                    b.Navigation("Scores");
 
                     b.Navigation("UserSchedules");
                 });

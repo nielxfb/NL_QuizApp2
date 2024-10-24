@@ -13,6 +13,7 @@ using QuizApp.Application.Commands.Handlers.Response;
 using QuizApp.Application.Commands.Handlers.Schedule;
 using QuizApp.Application.Commands.Handlers.User;
 using QuizApp.Application.Commands.Handlers.UserSchedule;
+using QuizApp.Application.Commands.Handlers.UserScore;
 using QuizApp.Application.Commands.Option;
 using QuizApp.Application.Commands.Question;
 using QuizApp.Application.Commands.Quiz;
@@ -20,6 +21,7 @@ using QuizApp.Application.Commands.Response;
 using QuizApp.Application.Commands.Schedule;
 using QuizApp.Application.Commands.User;
 using QuizApp.Application.Commands.UserSchedule;
+using QuizApp.Application.Commands.UserScore;
 using QuizApp.Application.DTOs.Option;
 using QuizApp.Application.DTOs.Question;
 using QuizApp.Application.DTOs.Quiz;
@@ -116,6 +118,7 @@ builder.Services.AddScoped<IUserScheduleRepository, UserScheduleRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IOptionRepository, OptionRepository>();
 builder.Services.AddScoped<IResponseRepository, ResponseRepository>();
+builder.Services.AddScoped<IUserScoreRepository, UserScoreRepository>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
@@ -137,6 +140,8 @@ builder.Services.AddScoped<ICommandHandler<RemoveOptionCommand>, RemoveOptionHan
 builder.Services.AddScoped<ICommandHandler<UpdateOptionCommand>, UpdateOptionHandler>();
 builder.Services.AddScoped<ICommandHandler<AddResponseCommand>, AddResponseHandler>();
 builder.Services.AddScoped<ICommandHandler<UpdateResponseCommand>, UpdateResponseHandler>();
+builder.Services.AddScoped<ICommandHandler<UpdateStatusCommand>, UpdateStatusHandler>();
+builder.Services.AddScoped<ICommandHandler<AddUserScoreCommand>, AddUserScoreHandler>();
 
 builder.Services.AddScoped<IQueryHandler<LoginUserQuery, UserDetailsDto>, LoginUserHandler>();
 builder.Services.AddScoped<IQueryHandler<LoginByCookieQuery, UserDetailsDto>, LoginByCookieHandler>();

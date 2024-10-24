@@ -11,4 +11,5 @@ public class User
     [MaxLength(10)] public string Role { get; set; } = string.Empty;
     public ICollection<UserSchedule> UserSchedules { get; } = new List<UserSchedule>();
     public ICollection<Response> Responses { get; } = new List<Response>();
+    public ICollection<UserScore> Scores { get; } = new List<UserScore>();
 }

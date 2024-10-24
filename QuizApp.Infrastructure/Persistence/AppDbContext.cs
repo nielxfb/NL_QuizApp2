@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<Response> Responses { get; set; }
     public DbSet<Schedule> Schedules { get; set; }
     public DbSet<UserSchedule> UserSchedules { get; set; }
+    public DbSet<UserScore> UserScores { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -75,6 +76,18 @@ public class AppDbContext : DbContext
             .WithOne(e => e.Option)
             .HasForeignKey(e => new { e.QuestionId, e.OptionChoice })
             .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
+
+        modelBuilder.Entity<UserScore>()
+            .HasOne(e => e.User)
+            .WithMany(e => e.Scores)
+            .HasForeignKey(e => e.UserId)
+            .IsRequired();
+
+        modelBuilder.Entity<UserScore>()
+            .HasOne(e => e.Quiz)
+            .WithMany(e => e.UserScores)
+            .HasForeignKey(e => e.QuizId)
             .IsRequired();
 
         base.OnModelCreating(modelBuilder);

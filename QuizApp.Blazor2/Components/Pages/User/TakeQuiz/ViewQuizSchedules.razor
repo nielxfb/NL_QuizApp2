@@ -61,18 +61,24 @@
         if (DateTime.UtcNow < UserSchedules.First(s => s.ScheduleId == scheduleId).StartDate)
         {
             ErrorMessage = "The quiz has not started yet.";
+            _isLoading = false;
+            StateHasChanged();
             return;
         }
 
         if (DateTime.UtcNow > UserSchedules.First(s => s.ScheduleId == scheduleId).EndDate)
         {
             ErrorMessage = "The quiz has ended.";
+            _isLoading = false;
+            StateHasChanged();
             return;
         }
 
         if (UserSchedules.First(s => s.ScheduleId == scheduleId).Status == "Completed")
         {
             ErrorMessage = "Quiz has been completed.";
+            _isLoading = false;
+            StateHasChanged();
             return;
         }
 

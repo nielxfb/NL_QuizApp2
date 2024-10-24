@@ -9,4 +9,5 @@ public class Quiz
     public ICollection<Schedule> Schedules { get; } = new List<Schedule>();
     public ICollection<Question> Questions { get; } = new List<Question>();
     public ICollection<Response> Responses { get; } = new List<Response>();
+    public ICollection<UserScore> UserScores { get; } = new List<UserScore>();
 }

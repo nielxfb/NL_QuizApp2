@@ -22,6 +22,8 @@ builder.Services.AddScoped<QuestionService>();
 builder.Services.AddScoped<OptionService>();
 builder.Services.AddScoped<ScheduleService>();
 builder.Services.AddScoped<UserScheduleService>();
+builder.Services.AddScoped<ResponseService>();
+builder.Services.AddScoped<UserScoreService>();
 
 builder.Services.Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMQ"));
 builder.Services.AddScoped(typeof(IRabbitMqPublisher<>), typeof(RabbitMqPublisher<>));

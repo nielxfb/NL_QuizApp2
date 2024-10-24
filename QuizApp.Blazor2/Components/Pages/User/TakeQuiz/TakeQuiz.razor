@@ -1,5 +1,7 @@
 @page "/TakeQuiz/{Id}"
 @using QuizApp.Application.DTOs.Response
+@using QuizApp.Application.DTOs.UserScore
+@using QuizApp.Domain.Entities
 @using QuizApp.Domain.Interfaces
 @layout NavbarLayout
 
@@ -7,8 +9,12 @@
 @inject ScheduleService ScheduleService
 @inject QuizService QuizService
 @inject QuestionService QuestionService
+@inject UserScoreService UserScoreService
 @inject UserService UserService
 @inject IRabbitMqPublisher<AddResponseDto> Publisher
+@inject UserScheduleService UserScheduleService
+@inject NavigationManager Nav
+@inject ResponseService ResponseService
 
 <PageTitle>Quiz App</PageTitle>
 
@@ -40,28 +46,30 @@
                 }
                 else
                 {
-                    <InputRadioGroup @bind-Value="questionSelection.SelectedOption">
-                        @foreach (var option in questionSelection.Options)
-                        {
-                            <div class="d-flex align-items-center gap-2">
-                                <InputRadio Value="@option.OptionChoice.ToString()" @onclick="() => OnOptionSelected(questionSelection)"/>
-                                <div class="p-0 m-0 d-flex align-items-center gap-2">
-                                    <div class="p-0 m-0 d-flex align-items-center">
-                                        <p class="fw-bold m-0">
-                                            @(option.OptionChoice)
-                                        </p>
-                                        .
-                                    </div>
-                                    <p class="p-0 m-0 me-2">@option.OptionText</p>
+                    @foreach (var option in questionSelection.Options)
+                    {
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="radio"
+                                   name="@($"question_{questionSelection.Question.QuestionId}")"
+                                   value="@option.OptionChoice"
+                                   checked="@(option.OptionChoice.ToString() == questionSelection.SelectedOption)"
+                                   @onchange="() => OnOptionSelected(questionSelection, option)"/>
+                            <div class="p-0 m-0 d-flex align-items-center gap-2">
+                                <div class="p-0 m-0 d-flex align-items-center">
+                                    <p class="fw-bold m-0">@option.OptionChoice</p>
+                                    .
                                 </div>
+                                <p class="p-0 m-0 me-2">@option.OptionText</p>
                             </div>
-                        }
-                    </InputRadioGroup>
+                        </div>
+                    }
                 }
             </div>
 
         </div>
     }
+
+    <button class="btn btn-success" @onclick="FinalizeQuiz">Finalize Quiz</button>
 
 </div>
 
@@ -73,31 +81,78 @@
     private bool _isLoading = true;
     private DateTime _serverTime;
     private TimeSpan _timeRemaining;
-    private DateTime _targetTime = DateTime.MinValue;
     private string ErrorMessage { get; set; } = string.Empty;
     private ScheduleDetailsDto Schedule { get; set; } = new();
     private List<QuestionDto> Questions { get; set; } = new();
+    private UserDetailsDto User { get; set; } = new();
 
     private List<QuestionSelection> QuestionSelections { get; set; } = new();
 
-    private async Task OnOptionSelected(QuestionSelection questionSelection)
+    private async Task FinalizeQuiz()
     {
-        Console.WriteLine("Kepencet ");
-        var quizId = Schedule.Quiz.Id;
-        var user = await UserService.GetUserDetails();
-        if (!user.IsSuccess)
+        _isLoading = true;
+        StateHasChanged();
+
+        var response = await UserScheduleService.UpdateStatus(new UpdateStatusDto
         {
-            ErrorMessage = user.Message;
+            ScheduleId = Schedule.Id,
+            UserId = User.UserId,
+            Status = "Completed",
+        });
+
+        if (!response.IsSuccess)
+        {
+            ErrorMessage = response.Message;
+            _isLoading = false;
+            StateHasChanged();
             return;
         }
 
-        var userId = user.Data!.UserId;
+        List<OptionDto> selectedOptions = new();
+        foreach (var qS in QuestionSelections)
+        {
+            var selectedOption = qS.Options
+                .FirstOrDefault(o => o.OptionChoice.ToString() == qS.SelectedOption);
+
+            if (selectedOption != null)
+                selectedOptions.Add(new OptionDto
+                {
+                    OptionChoice = qS.SelectedOption[0],
+                    OptionText = selectedOption.OptionText,
+                    IsCorrect = selectedOption.IsCorrect
+                });
+        }
+
+        var scoreResponse = await UserScoreService.AddUserScoreAsync(new AddUserScoreDto
+        {
+            UserId = User.UserId,
+            QuizId = Schedule.Quiz.Id,
+            QuestionCount = QuestionSelections.Count,
+            SelectedOptions = selectedOptions,
+        });
+
+        if (!scoreResponse.IsSuccess)
+        {
+            ErrorMessage = scoreResponse.Message;
+            _isLoading = false;
+            StateHasChanged();
+            return;
+        }
+
+        Nav.NavigateTo("/ViewQuizSchedules");
+    }
+
+    private async Task OnOptionSelected(QuestionSelection questionSelection, OptionDto option)
+    {
+        var quizId = Schedule.Quiz.Id;
+        questionSelection.SelectedOption = option.OptionChoice.ToString();
+        StateHasChanged();
 
         var dto = new AddResponseDto
         {
             QuestionId = questionSelection.Question.QuestionId,
-            OptionChoice = questionSelection.SelectedOption,
-            UserId = userId,
+            OptionChoice = option.OptionChoice.ToString(),
+            UserId = User.UserId,
             QuizId = quizId
         };
 
@@ -109,6 +164,18 @@
         if (firstRender)
         {
             _isLoading = true;
+
+            var userResponse = await UserService.GetUserDetails();
+            if (!userResponse.IsSuccess)
+            {
+                ErrorMessage = userResponse.Message;
+                _isLoading = false;
+                StateHasChanged();
+                return;
+            }
+
+            User = userResponse.Data!;
+
             var scheduleResponse = await ScheduleService.GetScheduleById(Id);
             if (!scheduleResponse.IsSuccess)
             {
@@ -119,7 +186,6 @@
             }
 
             Schedule = scheduleResponse.Data!;
-            _targetTime = Schedule.EndDate;
 
             var quizResponse = await QuizService.GetQuizById(Schedule.Quiz.Id.ToString());
             if (!quizResponse.IsSuccess)
@@ -142,36 +208,57 @@
 
             Questions = questionResponse.Data!;
 
-            QuestionSelections = Questions.Select(q => new QuestionSelection
+            var selectedOptionsResponse = await ResponseService.GetUserResponses(new GetUserResponsesInQuizDto
             {
-                Question = q,
-                Options = q.Options
-            }).ToList();
+                UserId = User.UserId,
+                QuizId = Schedule.Quiz.Id
+            });
+
+            if (!selectedOptionsResponse.IsSuccess)
+            {
+                ErrorMessage = selectedOptionsResponse.Message;
+                _isLoading = false;
+                StateHasChanged();
+                return;
+            }
+
+            var selectedOptions = selectedOptionsResponse.Data!;
+
+            foreach (var question in Questions)
+            {
+                var selectedOption = selectedOptions.SelectedOptions
+                    .FirstOrDefault(so => so.Question.QuestionId == question.QuestionId);
+                QuestionSelections.Add(new QuestionSelection
+                {
+                    Question = question,
+                    SelectedOption = selectedOption != null
+                        ? selectedOption.SelectedOption.OptionChoice.ToString()
+                        : string.Empty,
+                    Options = question.Options
+                });
+            }
+
+            var connection = new HubConnectionBuilder()
+                .WithUrl($"{HttpClient.BaseAddress}TimeHub")
+                .Build();
+
+            connection.On<DateTime>("ReceiveTime", time =>
+            {
+                _serverTime = time;
+                CalculateTimeRemaining();
+                InvokeAsync(StateHasChanged);
+            });
+
+            await connection.StartAsync();
 
             StateHasChanged();
             _isLoading = false;
         }
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        var connection = new HubConnectionBuilder()
-            .WithUrl($"{HttpClient.BaseAddress}TimeHub")
-            .Build();
-
-        connection.On<DateTime>("ReceiveTime", time =>
-        {
-            _serverTime = time;
-            CalculateTimeRemaining();
-            InvokeAsync(StateHasChanged);
-        });
-
-        await connection.StartAsync();
-    }
-
     private void CalculateTimeRemaining()
     {
-        _timeRemaining = _targetTime - _serverTime.ToUniversalTime();
+        _timeRemaining = Schedule.EndDate - _serverTime.ToUniversalTime();
 
         if (_timeRemaining <= TimeSpan.Zero)
         {

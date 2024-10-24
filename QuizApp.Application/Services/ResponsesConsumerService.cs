@@ -65,7 +65,7 @@ public class ResponsesConsumerService : BackgroundService
             if (processedSuccessfully)
                 _channel.BasicAck(ea.DeliveryTag, false);
             else
-                _channel.BasicReject(ea.DeliveryTag, true);
+                _channel.BasicReject(ea.DeliveryTag, false);
         };
 
         _channel.BasicConsume(queue: "responses-queue", autoAck: false, consumer: consumer);
