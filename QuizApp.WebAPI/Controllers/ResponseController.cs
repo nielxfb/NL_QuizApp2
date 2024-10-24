@@ -29,7 +29,7 @@ public class ResponseController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetUserResponses([FromQuery] GetUserResponsesInQuizDto dto)
     {
-        if (dto.QuizId == Guid.Empty || dto.UserId == Guid.Empty) return BadRequest("All fields are required");
+        if (dto.ScheduleId == Guid.Empty || dto.UserId == Guid.Empty) return BadRequest("All fields are required");
 
         try
         {
@@ -46,7 +46,7 @@ public class ResponseController : ControllerBase
     [Authorize]
     public async Task<IActionResult> AddResponse([FromBody] AddResponseDto dto)
     {
-        if (dto.QuizId == Guid.Empty || dto.UserId == Guid.Empty || dto.QuestionId == Guid.Empty ||
+        if (dto.ScheduleId == Guid.Empty || dto.UserId == Guid.Empty || dto.QuestionId == Guid.Empty ||
             dto.OptionChoice == "") return BadRequest("All fields are required");
 
         try

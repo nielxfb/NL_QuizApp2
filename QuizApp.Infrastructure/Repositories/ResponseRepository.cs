@@ -26,10 +26,10 @@ public class ResponseRepository : IResponseRepository
         return _context.SaveChangesAsync();
     }
 
-    public async Task<List<Response>> GetUserResponsesInQuizAsync(Guid userId, Guid quizId)
+    public async Task<List<Response>> GetUserResponsesInQuizAsync(Guid userId, Guid scheduleId)
     {
         return await _context.Responses
-            .Where(r => r.UserId == userId && r.QuizId == quizId)
+            .Where(r => r.UserId == userId && r.ScheduleId == scheduleId)
             .Include(r => r.Option)
             .Include(r => r.Question)
             .ToListAsync();

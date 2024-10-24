@@ -8,6 +8,5 @@ public class Quiz
     [MaxLength(20)] public string Title { get; set; } = string.Empty;
     public ICollection<Schedule> Schedules { get; } = new List<Schedule>();
     public ICollection<Question> Questions { get; } = new List<Question>();
-    public ICollection<Response> Responses { get; } = new List<Response>();
     public ICollection<UserScore> UserScores { get; } = new List<UserScore>();
 }

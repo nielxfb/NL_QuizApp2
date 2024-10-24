@@ -51,7 +51,7 @@ public class AppDbContext : DbContext
             .IsRequired();
 
         modelBuilder.Entity<Quiz>()
-            .HasMany(e => e.Responses)
+            .HasMany(e => e.Schedules)
             .WithOne(e => e.Quiz)
             .HasForeignKey(e => e.QuizId)
             .OnDelete(DeleteBehavior.NoAction)
@@ -68,6 +68,13 @@ public class AppDbContext : DbContext
             .HasMany(e => e.Responses)
             .WithOne(e => e.User)
             .HasForeignKey(e => e.UserId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .IsRequired();
+
+        modelBuilder.Entity<Response>()
+            .HasOne(e => e.Schedule)
+            .WithMany(e => e.Responses)
+            .HasForeignKey(e => e.ScheduleId)
             .OnDelete(DeleteBehavior.NoAction)
             .IsRequired();
 

@@ -153,7 +153,7 @@
             QuestionId = questionSelection.Question.QuestionId,
             OptionChoice = option.OptionChoice.ToString(),
             UserId = User.UserId,
-            QuizId = quizId
+            ScheduleId = Schedule.Id,
         };
 
         await Publisher.PublishMessageAsync(dto);
@@ -187,17 +187,7 @@
 
             Schedule = scheduleResponse.Data!;
 
-            var quizResponse = await QuizService.GetQuizById(Schedule.Quiz.Id.ToString());
-            if (!quizResponse.IsSuccess)
-            {
-                ErrorMessage = quizResponse.Message;
-                _isLoading = false;
-                StateHasChanged();
-                return;
-            }
-
-            var quiz = quizResponse.Data!;
-            var questionResponse = await QuestionService.GetQuestionsInQuiz(quiz.Id.ToString());
+            var questionResponse = await QuestionService.GetQuestionsInQuiz(Schedule.Quiz.Id.ToString());
             if (!questionResponse.IsSuccess)
             {
                 ErrorMessage = questionResponse.Message;
@@ -211,7 +201,7 @@
             var selectedOptionsResponse = await ResponseService.GetUserResponses(new GetUserResponsesInQuizDto
             {
                 UserId = User.UserId,
-                QuizId = Schedule.Quiz.Id
+                ScheduleId = Schedule.Id
             });
 
             if (!selectedOptionsResponse.IsSuccess)

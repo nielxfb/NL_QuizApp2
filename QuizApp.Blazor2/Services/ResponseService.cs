@@ -35,7 +35,7 @@ public class ResponseService
         try
         {
             var response =
-                await _httpClient.GetAsync($"api/Response/get-user-responses?userId={dto.UserId}&quizId={dto.QuizId}");
+                await _httpClient.GetAsync($"api/Response/get-user-responses?userId={dto.UserId}&scheduleId={dto.ScheduleId}");
             if (!response.IsSuccessStatusCode)
             {
                 var message = await response.Content.ReadAsStringAsync();

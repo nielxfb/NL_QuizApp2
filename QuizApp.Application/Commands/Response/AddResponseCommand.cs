@@ -4,7 +4,7 @@ namespace QuizApp.Application.Commands.Response;
 
 public class AddResponseCommand
 {
-    public Guid QuizId { get; set; }
+    public Guid ScheduleId { get; set; }
     public Guid UserId { get; set; }
     public Guid QuestionId { get; set; }
     public char OptionChoice { get; set; }
@@ -12,7 +12,7 @@ public class AddResponseCommand
 
     public AddResponseCommand(AddResponseDto dto)
     {
-        QuizId = dto.QuizId;
+        ScheduleId = dto.ScheduleId;
         UserId = dto.UserId;
         QuestionId = dto.QuestionId;
         OptionChoice = dto.OptionChoice[0];

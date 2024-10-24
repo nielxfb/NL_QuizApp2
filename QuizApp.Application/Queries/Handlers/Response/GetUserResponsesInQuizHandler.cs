@@ -10,31 +10,27 @@ namespace QuizApp.Application.Queries.Handlers.Response;
 public class GetUserResponsesInQuizHandler : IQueryHandler<GetUserResponsesInQuizQuery, ResponseDto>
 {
     private readonly IUserRepository _userRepository;
-    private readonly IQuizRepository _quizRepository;
+    private readonly IScheduleRepository _scheduleRepository;
     private readonly IResponseRepository _repository;
 
-    public GetUserResponsesInQuizHandler(IUserRepository userRepository, IQuizRepository quizRepository,
-        IResponseRepository repository)
+    public GetUserResponsesInQuizHandler(IUserRepository userRepository, IScheduleRepository scheduleRepository, IResponseRepository repository)
     {
         _userRepository = userRepository;
-        _quizRepository = quizRepository;
+        _scheduleRepository = scheduleRepository;
         _repository = repository;
     }
-
 
     public async Task<ResponseDto> HandleAsync(GetUserResponsesInQuizQuery query)
     {
         var user = await _userRepository.GetByIdAsync(query.UserId);
         if (user == null) throw new ArgumentException("User not found");
 
-        var quiz = await _quizRepository.GetByIdAsync(query.QuizId);
+        var quiz = await _scheduleRepository.GetByIdAsync(query.ScheduleId);
         if (quiz == null) throw new ArgumentException("Quiz not found");
 
-        var responses = await _repository.GetUserResponsesInQuizAsync(query.UserId, query.QuizId);
-        var score = (float)responses.Where(r => r.Option.IsCorrect).ToList().Count / quiz.Questions.Count;
+        var responses = await _repository.GetUserResponsesInQuizAsync(query.UserId, query.ScheduleId);
         return new ResponseDto
         {
-            Quiz = quiz,
             SelectedOptions = responses.Select(r => new SelectedOptionDto
             {
                 Question = new QuestionDto
@@ -52,7 +48,6 @@ public class GetUserResponsesInQuizHandler : IQueryHandler<GetUserResponsesInQui
                 },
                 IsCorrect = r.IsCorrect
             }).ToList(),
-            Score = score
         };
     }
 }

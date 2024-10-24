@@ -7,23 +7,22 @@ namespace QuizApp.Application.Commands.Handlers.Response;
 public class AddResponseHandler : ICommandHandler<AddResponseCommand>
 {
     private readonly IResponseRepository _repository;
-    private readonly IQuizRepository _quizRepository;
+    private readonly IScheduleRepository _scheduleRepository;
     private readonly IUserRepository _userRepository;
     private readonly IOptionRepository _optionRepository;
 
-    public AddResponseHandler(IResponseRepository repository, IQuizRepository quizRepository,
-        IUserRepository userRepository, IOptionRepository optionRepository)
+    public AddResponseHandler(IResponseRepository repository, IScheduleRepository scheduleRepository, IUserRepository userRepository, IOptionRepository optionRepository)
     {
         _repository = repository;
-        _quizRepository = quizRepository;
+        _scheduleRepository = scheduleRepository;
         _userRepository = userRepository;
         _optionRepository = optionRepository;
     }
 
     public async Task HandleAsync(AddResponseCommand command)
     {
-        var quiz = await _quizRepository.GetByIdAsync(command.QuizId);
-        if (quiz == null) throw new ArgumentException("Quiz not found.");
+        var schedule = await _scheduleRepository.GetByIdAsync(command.ScheduleId);
+        if (schedule == null) throw new ArgumentException("Schedule not found.");
 
         var user = await _userRepository.GetByIdAsync(command.UserId);
         if (user == null) throw new ArgumentException("User not found.");
@@ -39,7 +38,7 @@ public class AddResponseHandler : ICommandHandler<AddResponseCommand>
             var response = new Domain.Entities.Response
             {
                 ResponseId = Guid.NewGuid(),
-                QuizId = command.QuizId,
+                ScheduleId = command.ScheduleId,
                 UserId = command.UserId,
                 QuestionId = command.QuestionId,
                 OptionChoice = command.OptionChoice,

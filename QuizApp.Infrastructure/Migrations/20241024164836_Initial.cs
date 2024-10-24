@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QuizApp.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,7 +30,7 @@ namespace QuizApp.Infrastructure.Migrations
                     UserId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
                     FullName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Initial = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Role = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
                 },
                 constraints: table =>
@@ -74,7 +74,31 @@ namespace QuizApp.Infrastructure.Migrations
                         name: "FK_Schedules_Quizzes_QuizId",
                         column: x => x.QuizId,
                         principalTable: "Quizzes",
+                        principalColumn: "QuizId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserScores",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    QuizId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Score = table.Column<float>(type: "real", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserScores", x => new { x.UserId, x.QuizId });
+                    table.ForeignKey(
+                        name: "FK_UserScores_Quizzes_QuizId",
+                        column: x => x.QuizId,
+                        principalTable: "Quizzes",
                         principalColumn: "QuizId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserScores_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -129,7 +153,7 @@ namespace QuizApp.Infrastructure.Migrations
                 columns: table => new
                 {
                     ResponseId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
-                    QuizId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
+                    ScheduleId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
                     QuestionId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
                     OptionChoice = table.Column<string>(type: "nvarchar(1)", nullable: false),
@@ -143,17 +167,18 @@ namespace QuizApp.Infrastructure.Migrations
                         name: "FK_Responses_Options_QuestionId_OptionChoice",
                         columns: x => new { x.QuestionId, x.OptionChoice },
                         principalTable: "Options",
-                        principalColumns: new[] { "QuestionId", "OptionChoice" });
+                        principalColumns: new[] { "QuestionId", "OptionChoice" },
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Responses_Questions_QuestionId",
                         column: x => x.QuestionId,
                         principalTable: "Questions",
                         principalColumn: "QuestionId");
                     table.ForeignKey(
-                        name: "FK_Responses_Quizzes_QuizId",
-                        column: x => x.QuizId,
-                        principalTable: "Quizzes",
-                        principalColumn: "QuizId");
+                        name: "FK_Responses_Schedules_ScheduleId",
+                        column: x => x.ScheduleId,
+                        principalTable: "Schedules",
+                        principalColumn: "ScheduleId");
                     table.ForeignKey(
                         name: "FK_Responses_Users_UserId",
                         column: x => x.UserId,
@@ -178,9 +203,9 @@ namespace QuizApp.Infrastructure.Migrations
                 columns: new[] { "QuestionId", "OptionChoice" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Responses_QuizId",
+                name: "IX_Responses_ScheduleId",
                 table: "Responses",
-                column: "QuizId");
+                column: "ScheduleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Responses_UserId",
@@ -196,6 +221,11 @@ namespace QuizApp.Infrastructure.Migrations
                 name: "IX_UserSchedules_ScheduleId",
                 table: "UserSchedules",
                 column: "ScheduleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserScores_QuizId",
+                table: "UserScores",
+                column: "QuizId");
         }
 
         /// <inheritdoc />
@@ -206,6 +236,9 @@ namespace QuizApp.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserSchedules");
+
+            migrationBuilder.DropTable(
+                name: "UserScores");
 
             migrationBuilder.DropTable(
                 name: "Options");
