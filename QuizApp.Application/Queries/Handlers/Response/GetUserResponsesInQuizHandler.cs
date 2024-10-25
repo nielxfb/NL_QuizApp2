@@ -44,7 +44,8 @@ public class GetUserResponsesInQuizHandler : IQueryHandler<GetUserResponsesInQui
                     QuestionId = r.QuestionId,
                     ImageUrl = r.Option.ImageUrl,
                     IsCorrect = r.Option.IsCorrect,
-                    OptionText = r.Option.OptionText
+                    OptionText = r.Option.OptionText,
+                    OptionChoice = r.Option.OptionChoice,
                 },
                 IsCorrect = r.IsCorrect
             }).ToList(),

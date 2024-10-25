@@ -77,6 +77,7 @@ public class UserScheduleController : ControllerBase
         try
         {
             await _addUserToScheduleHandler.HandleAsync(new AddUserToScheduleCommand(dto));
+            _memoryCache.Remove(dto.UserId);
             return Ok("Successfully added user to schedule.");
         }
         catch (Exception ex)
@@ -94,6 +95,7 @@ public class UserScheduleController : ControllerBase
         try
         {
             await _removeUserFromScheduleHandler.HandleAsync(new RemoveUserFromScheduleCommand(dto));
+            _memoryCache.Remove(dto.UserId);
             return Ok("Successfully removed user from schedule.");
         }
         catch (Exception ex)
@@ -111,6 +113,7 @@ public class UserScheduleController : ControllerBase
         try
         {
             await _updateStatusHandler.HandleAsync(new UpdateStatusCommand(dto));
+            _memoryCache.Remove(dto.UserId);
             return Ok("Successfully updated user schedule status.");
         }
         catch (Exception ex)

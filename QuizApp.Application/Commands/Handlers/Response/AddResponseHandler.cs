@@ -32,7 +32,7 @@ public class AddResponseHandler : ICommandHandler<AddResponseCommand>
 
         var isCorrect = option.IsCorrect;
             
-        var existingResponse = await _repository.GetExistingResponse(command.UserId, command.QuestionId);
+        var existingResponse = await _repository.GetExistingResponse(command.UserId, command.QuestionId, command.ScheduleId);
         if (existingResponse == null)
         {
             var response = new Domain.Entities.Response

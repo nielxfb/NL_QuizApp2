@@ -38,4 +38,10 @@ public class UserScoreRepository : IUserScoreRepository
             .Where(us => us.UserId == userId)
             .ToListAsync();
     }
+
+    public Task UpdateAsync(UserScore userScore)
+    {
+        _context.UserScores.Update(userScore);
+        return _context.SaveChangesAsync();
+    }
 }

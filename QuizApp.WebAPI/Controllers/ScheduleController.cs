@@ -85,6 +85,7 @@ public class ScheduleController : ControllerBase
         try
         {
             await _addScheduleHandler.HandleAsync(new AddScheduleCommand(dto));
+            _memoryCache.Remove("schedules");
             return Ok("Schedule added successfully");
         }
         catch (Exception ex)
@@ -108,6 +109,7 @@ public class ScheduleController : ControllerBase
         try
         {
             await _updateScheduleHandler.HandleAsync(new UpdateScheduleCommand(dto));
+            _memoryCache.Remove("schedules");
             return Ok("Schedule updated successfully");
         }
         catch (Exception ex)
@@ -125,6 +127,7 @@ public class ScheduleController : ControllerBase
         try
         {
             await _removeScheduleHandler.HandleAsync(new RemoveScheduleCommand(id));
+            _memoryCache.Remove("schedules");
             return Ok("Schedule removed successfully");
         }
         catch (Exception ex)

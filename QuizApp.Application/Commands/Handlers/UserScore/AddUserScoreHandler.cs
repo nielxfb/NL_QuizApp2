@@ -33,6 +33,14 @@ public class AddUserScoreHandler : ICommandHandler<AddUserScoreCommand>
             if (option.IsCorrect)
                 correctAnswers++;
         }
+
+        var existingScore = await _repository.GetAsync(command.UserId, command.ScheduleId);
+        if (existingScore != null)
+        {
+            existingScore.Score = (float) correctAnswers / command.QuestionCount;
+            await _repository.UpdateAsync(existingScore);
+            return;
+        }
         
         var userScore = new Domain.Entities.UserScore
         {

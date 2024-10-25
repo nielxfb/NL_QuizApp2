@@ -16,6 +16,7 @@
 <div class="d-flex flex-column gap-2">
 
     <p class="text-danger">@ErrorMessage</p>
+    <p class="text-danger">@OptionErrorMessage</p>
     @foreach (var question in Questions)
     {
         <div class="border rounded-3 shadow-sm py-lg-3 px-lg-4">
@@ -60,8 +61,6 @@
                         }
                     </div>
                 }
-
-                <p class="text-danger">@OptionErrorMessage</p>
 
                 <button class="btn btn-primary" @onclick="() => AddOption(question)">Add Option</button>
             </div>
@@ -118,13 +117,8 @@
 
     private void EditQuestion(QuestionDto question)
     {
-        _isLoading = true;
-        StateHasChanged();
-
         SelectedQuestion = question;
         IsUpdateModalVisible = true;
-        _isLoading = false;
-        StateHasChanged();
     }
 
     private async Task DeleteOption(Guid questionId, char optionChoice)
@@ -168,6 +162,7 @@
         }
 
         IsAddModalVisible = false;
+        _isLoading = false;
         await Refresh();
         StateHasChanged();
     }
@@ -176,12 +171,16 @@
     {
         SelectedQuestion = new();
         IsUpdateModalVisible = false;
+        _isLoading = false;
         StateHasChanged();
     }
 
     private async Task OnUpdateModalSave()
     {
+        _isLoading = true;
         ErrorMessage = "";
+        
+        StateHasChanged();
 
         var response = await QuestionService.UpdateQuestion(new UpdateQuestionDto
         {
@@ -198,6 +197,7 @@
 
         SelectedQuestion = new();
         IsUpdateModalVisible = false;
+        _isLoading = false;
         await Refresh();
         StateHasChanged();
     }
@@ -206,6 +206,7 @@
     {
         SelectedQuestion = new();
         IsAddImageModalVisible = false;
+        _isLoading = false;
         await Refresh();
         StateHasChanged();
     }
@@ -305,6 +306,7 @@
         }
 
         Questions = questionsResponse.Data!;
+        _isLoading = false;
     }
 
 }

@@ -22,20 +22,14 @@ public class QuestionController : ControllerBase
     private readonly ICommandHandler<UpdateQuestionCommand> _updateQuestionHandler;
     private readonly ICommandHandler<AddImageUrlCommand> _addImageUrlHandler;
     private readonly IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>> _getQuestionsInQuizHandler;
-    private readonly IMemoryCache _memoryCache;
 
-    public QuestionController(ICommandHandler<AddQuestionCommand> addCommandHandler,
-        ICommandHandler<RemoveQuestionCommand> removeQuestionHandler,
-        ICommandHandler<UpdateQuestionCommand> updateQuestionHandler,
-        ICommandHandler<AddImageUrlCommand> addImageUrlHandler,
-        IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>> getQuestionsInQuizHandler, IMemoryCache memoryCache)
+    public QuestionController(ICommandHandler<AddQuestionCommand> addCommandHandler, ICommandHandler<RemoveQuestionCommand> removeQuestionHandler, ICommandHandler<UpdateQuestionCommand> updateQuestionHandler, ICommandHandler<AddImageUrlCommand> addImageUrlHandler, IQueryHandler<GetQuestionsInQuizQuery, List<QuestionDto>> getQuestionsInQuizHandler)
     {
         _addCommandHandler = addCommandHandler;
         _removeQuestionHandler = removeQuestionHandler;
         _updateQuestionHandler = updateQuestionHandler;
         _addImageUrlHandler = addImageUrlHandler;
         _getQuestionsInQuizHandler = getQuestionsInQuizHandler;
-        _memoryCache = memoryCache;
     }
 
     [HttpPost("add-question")]
@@ -63,11 +57,7 @@ public class QuestionController : ControllerBase
 
         try
         {
-            if (_memoryCache.TryGetValue(quizId, out List<QuestionDto>? questions))
-                return Ok(questions);
-
-            questions = await _getQuestionsInQuizHandler.HandleAsync(new GetQuestionsInQuizQuery(quizId));
-            _memoryCache.Set(quizId, questions, TimeSpan.FromMinutes(10));
+            var questions = await _getQuestionsInQuizHandler.HandleAsync(new GetQuestionsInQuizQuery(quizId));
             return Ok(questions);
         }
         catch (Exception e)

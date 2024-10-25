@@ -18,13 +18,11 @@ public class ResponseController : ControllerBase
 {
     private readonly IQueryHandler<GetUserResponsesInQuizQuery, ResponseDto> _getUserResponsesInQuizHandler;
     private readonly ICommandHandler<AddResponseCommand> _addResponseHandler;
-    private readonly IMemoryCache _memoryCache;
 
-    public ResponseController(IQueryHandler<GetUserResponsesInQuizQuery, ResponseDto> getUserResponsesInQuizHandler, ICommandHandler<AddResponseCommand> addResponseHandler, IMemoryCache memoryCache)
+    public ResponseController(IQueryHandler<GetUserResponsesInQuizQuery, ResponseDto> getUserResponsesInQuizHandler, ICommandHandler<AddResponseCommand> addResponseHandler)
     {
         _getUserResponsesInQuizHandler = getUserResponsesInQuizHandler;
         _addResponseHandler = addResponseHandler;
-        _memoryCache = memoryCache;
     }
 
     [HttpGet("get-user-responses")]
@@ -35,11 +33,7 @@ public class ResponseController : ControllerBase
 
         try
         {
-            if (_memoryCache.TryGetValue(new { dto.ScheduleId, dto.UserId }, out var responses))
-                return Ok(responses);
-            
-            responses = await _getUserResponsesInQuizHandler.HandleAsync(new GetUserResponsesInQuizQuery(dto));
-            _memoryCache.Set(new { dto.ScheduleId, dto.UserId }, responses, TimeSpan.FromMinutes(5));
+            var responses = await _getUserResponsesInQuizHandler.HandleAsync(new GetUserResponsesInQuizQuery(dto));
             return Ok(responses);
         }
         catch (Exception ex)
